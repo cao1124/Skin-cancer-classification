@@ -16,7 +16,7 @@
         "type": "iNaturalistDataLoader",
         "args":{
             "data_dir": "data/us_img/",
-            "batch_size": 512,
+            "batch_size": 32,
             "shuffle": true,
             "num_workers": 8
         }
