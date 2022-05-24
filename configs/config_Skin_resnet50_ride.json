@@ -16,15 +16,16 @@
         "type": "iNaturalistDataLoader",
         "args":{
             "data_dir": "data/us_img/",
-            "batch_size": 32,
+            "batch_size": 64,
             "shuffle": true,
             "num_workers": 8
         }
     },
+
     "optimizer": {
-        "type": "SGD",
+        "type": "Adam",
         "args":{
-            "lr": 0.2,
+            "lr": 0.001,
             "weight_decay": 2e-4,
             "momentum": 0.9,
             "nesterov": true
