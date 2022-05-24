@@ -19,6 +19,7 @@ shutil.copyfile('saved/models/{}/{}/checkpoint-epoch{}.pth'.format(experiment_ty
 
 pth = torch.load('saved/models/{}/{}/checkpoint-epoch{}.pth'.format(experiment_type, train_id, epochs))
 
+
 def pnorm(weights, p):
     normB = torch.norm(weights, 2, 1)
     ws = weights.clone()
@@ -26,13 +27,16 @@ def pnorm(weights, p):
         ws[i] = ws[i] / torch.pow(normB[i], p)
     return ws
 
+
 print(pth['state_dict'].keys())
+
 
 def parallel(key):
     if use_parallel:
         return "module." + key
     else:
         return key
+
 
 for ind in range(diversity_num):
     if diversity_num == 1:
