@@ -16,7 +16,7 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "data/us_img/",
+            "data_dir": "data/us_img_crop/",
             "batch_size": 64,
             "shuffle": true,
             "num_workers": 8,
