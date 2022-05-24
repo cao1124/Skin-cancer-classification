@@ -180,7 +180,7 @@ class ResNet(nn.Module):
 
         self.s = s
 
-        self.force_all = force_all # For calulating FLOPs
+        self.force_all = force_all  # For calulating FLOPs
 
         if not force_all:
             for name, param in self.named_parameters():

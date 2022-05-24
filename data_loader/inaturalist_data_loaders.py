@@ -79,16 +79,14 @@ class iNaturalistDataLoader(DataLoader):
             transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
-            transforms.Normalize([0.16987037599775578, 0.17693356047955439, 0.18799550695070924],
-                                 [0.22662016484341002, 0.2215753365538838, 0.22993350798294523])
+            transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
             # transforms.Normalize([0.466, 0.471, 0.380], [0.195, 0.194, 0.192])
         ])
         test_trsfm = transforms.Compose([
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
-            transforms.Normalize([0.16987037599775578, 0.17693356047955439, 0.18799550695070924],
-                                 [0.22662016484341002, 0.2215753365538838, 0.22993350798294523])
+            transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
             # transforms.Normalize([0.466, 0.471, 0.380], [0.195, 0.194, 0.192])
         ])
 
