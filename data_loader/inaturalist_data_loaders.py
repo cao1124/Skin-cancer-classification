@@ -96,7 +96,7 @@ class iNaturalistDataLoader(DataLoader):
             dataset = LT_Dataset(data_dir, data_dir + '/train.txt', train_trsfm)
             val_dataset = LT_Dataset(data_dir, data_dir + '/val.txt', test_trsfm)
         else:   # test
-            dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_val.txt', test_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/val.txt', test_trsfm)
             val_dataset = None
 
         self.dataset = dataset
