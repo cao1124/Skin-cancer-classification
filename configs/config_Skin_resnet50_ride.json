@@ -23,11 +23,12 @@
     },
 
     "optimizer": {
-        "type": "Adam",
+        "type": "SGD",
         "args":{
-            "lr": 0.001,
-            "weight_decay": 0.0001,
-            "amsgrad": true
+            "lr": 0.2,
+            "weight_decay": 2e-4,
+            "momentum": 0.9,
+            "nesterov": true
         }
     },
     "add_extra_info": true,
