@@ -125,7 +125,7 @@ def main(config):
 
     if get_class_acc:
         # Here we assume each class has same number of instances
-        assert np.all(test_cls_num_list == test_cls_num_list[0])
+        # assert np.all(test_cls_num_list == test_cls_num_list[0])
 
         many_shot_acc = acc[many_shot].mean()
         medium_shot_acc = acc[medium_shot].mean()
