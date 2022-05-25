@@ -68,6 +68,7 @@ def main(config):
             training=True
         )
         test_cls_num_list = np.array(data_loader.cls_num_list)
+        print('===============test_cls_num_list================', test_cls_num_list)
         train_cls_num_list = np.array(train_data_loader.cls_num_list)
         many_shot = train_cls_num_list > 100
         medium_shot = (train_cls_num_list <= 100) & (train_cls_num_list >= 20)

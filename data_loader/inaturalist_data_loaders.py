@@ -96,7 +96,7 @@ class iNaturalistDataLoader(DataLoader):
             dataset = LT_Dataset(data_dir, data_dir + '/train.txt', train_trsfm)
             val_dataset = LT_Dataset(data_dir, data_dir + '/val.txt', test_trsfm)
         else:   # test
-            dataset = LT_Dataset(data_dir, data_dir + '/val.txt', test_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/data1326.txt', test_trsfm)
             val_dataset = None
 
         self.dataset = dataset
@@ -110,7 +110,7 @@ class iNaturalistDataLoader(DataLoader):
         cls_num_list = [0] * num_classes
         for label in dataset.targets:
             cls_num_list[label] += 1
-
+        print('===============cls_num_list================', cls_num_list)
         self.cls_num_list = cls_num_list
 
         if balanced:
