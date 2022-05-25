@@ -16,7 +16,7 @@
         "type": "iNaturalistDataLoader",
         "args":{
             "data_dir": "data/us_img_crop/",
-            "batch_size": 64,
+            "batch_size": 128,
             "shuffle": true,
             "num_workers": 8
         }
@@ -25,7 +25,7 @@
     "optimizer": {
         "type": "SGD",
         "args":{
-            "lr": 0.2,
+            "lr": 0.01,
             "weight_decay": 2e-4,
             "momentum": 0.9,
             "nesterov": true
@@ -53,7 +53,7 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 200,
 
         "save_dir": "saved/",
         "save_period": 100,
