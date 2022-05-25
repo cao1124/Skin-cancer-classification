@@ -110,7 +110,7 @@ class iNaturalistDataLoader(DataLoader):
         cls_num_list = [0] * num_classes
         for label in dataset.targets:
             cls_num_list[label] += 1
-        print('===============cls_num_list================', cls_num_list)
+
         self.cls_num_list = cls_num_list
 
         if balanced:
