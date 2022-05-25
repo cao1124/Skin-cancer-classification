@@ -9,14 +9,14 @@
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
-            "num_experts": 6
+            "num_experts": 9
         }
     },
     "distill_arch": {
         "type": "ResNet50Model",
         "args": {
             "num_classes": 22,
-            "num_experts": 6,
+            "num_experts": 9,
             "reduce_dimension": true,
             "returns_feat": true,
             "use_norm": true
