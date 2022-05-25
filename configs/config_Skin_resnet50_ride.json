@@ -48,7 +48,7 @@
         "args": {
             "step1": 120,
             "step2": 240,
-            "gamma": 0.005,
+            "gamma": 0.1,
             "warmup_epoch": 5
         }
     },
