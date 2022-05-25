@@ -1,0 +1,77 @@
+{
+    "name": "Skin_ResNet50_RIDE",
+    "n_gpu": 2,
+
+    "arch": {
+        "type": "ResNet50Model",
+        "args": {
+            "num_classes": 22,
+            "reduce_dimension": true,
+            "use_norm": true,
+            "returns_feat": true,
+            "num_experts": 6
+        }
+    },
+    "distill_arch": {
+        "type": "ResNet50Model",
+        "args": {
+            "num_classes": 22,
+            "num_experts": 6,
+            "reduce_dimension": true,
+            "returns_feat": true,
+            "use_norm": true
+        }
+    },
+    "distill": true,
+    "distill_checkpoint": "data/iNaturalist_teacher_104314/checkpoint-epoch100.pth",
+    "data_loader": {
+        "type": "iNaturalistDataLoader",
+        "args":{
+            "data_dir": "data/us_img_crop",
+            "batch_size": 96,
+            "shuffle": true,
+            "num_workers": 8
+        }
+    },
+    "optimizer": {
+        "type": "SGD",
+        "args":{
+            "lr": 0.01,
+            "weight_decay": 2e-4,
+            "momentum": 0.9,
+            "nesterov": true
+        }
+    },
+    "add_extra_info": true,
+    "loss": {
+        "type": "RIDELossWithDistill",
+        "args": {
+            "distill_temperature": 1.5,
+            "reweight": true,
+            "reweight_factor": 0.015,
+            "reweight_epoch": 80
+        }
+    },
+    "metrics": [
+        "accuracy"
+    ],
+    "lr_scheduler": {
+        "type": "CustomLR",
+        "args": {
+            "step1": 120,
+            "step2": 240,
+            "gamma": 0.1,
+            "warmup_epoch": 5
+        }
+    },
+    "trainer": {
+        "epochs": 300,
+
+        "save_dir": "saved/",
+        "save_period": 100,
+        "verbosity": 2,
+
+        "monitor": "max val_accuracy",
+        "tensorboard": false
+    }
+}
