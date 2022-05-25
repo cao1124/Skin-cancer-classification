@@ -48,7 +48,7 @@
     },
     "resume_state_dict_only": true,
     "trainer": {
-        "epochs": 5,
+        "epochs": 10,
 
         "save_dir": "saved/",
         "save_period": 5,
