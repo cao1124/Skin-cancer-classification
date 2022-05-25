@@ -7,8 +7,8 @@
         "args": {
             "num_classes": 22,
             "reduce_dimension": true,
-            "num_experts": 3,
-            "top_choices_num": 1,
+            "num_experts": 6,
+            "top_choices_num": 22,
             "use_norm": true,
             "pos_weight": 1e2
         }
