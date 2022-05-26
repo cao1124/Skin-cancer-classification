@@ -37,7 +37,7 @@
         "args": {
             "reweight": true,
             "reweight_factor": 0.015,
-            "reweight_epoch": 80
+            "reweight_epoch": 240
         }
     },
     "metrics": [
