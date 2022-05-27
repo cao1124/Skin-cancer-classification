@@ -80,23 +80,13 @@ def prepare_train(data_dir):
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
     resnet50 = models.resnet50(pretrained=True)
-    # print(resnet50)
 
     resnet50.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     resnet50.to(device)
 
-    # 在PyTorch中加载模型时，所有参数的‘requires_grad’字段默认设置为true。这意味着对参数值的每一次更改都将被存储，以便在用于训练的反向传播图中使用。
-    # 这增加了内存需求。由于预训练的模型中的大多数参数已经训练好了，因此将requires_grad字段重置为false。
-    # for param in resnet50.parameters():
-    #     param.requires_grad = False
-
-    # 为了适应自己的数据集，将ResNet-50的最后一层替换为，将原来最后一个全连接层的输入喂给一个有256个输出单元的线性层，接着再连接ReLU层和Dropout层，然后是256 x 6的线性层，输出为6通道的softmax层。
-
-    # 用GPU进行训练。
-
     # 定义损失函数和优化器。
-    loss_func = nn.NLLLoss()
-    optimizer = optim.Adam(resnet50.parameters())
+    loss_func = nn.CrossEntropyLoss()
+    optimizer = optim.SGD(resnet50.parameters(), lr=0.001)
     return train_data, train_data_size, valid_data, valid_data_size, resnet50, optimizer, loss_func
 
 
@@ -124,17 +114,15 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
             inputs = data[0].to(device)
             labels = data[1].to(device)
 
-            # 因为这里梯度是累加的，所以每次记得清零
-            optimizer.zero_grad()
             outputs = model(inputs)
             loss = loss_function(outputs, labels)
+            train_loss += loss.item()
+            pred = torch.max(outputs, 1)[1]
+            train_correct = (pred == labels).sum()
+            train_acc += train_correct.item()
+            optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            train_loss += loss.item() * inputs.size(0)
-            ret, predictions = torch.max(outputs.data, 1)
-            correct_counts = predictions.eq(labels.data.view_as(predictions))
-            acc = torch.mean(correct_counts.type(torch.FloatTensor))
-            train_acc += acc.item() * inputs.size(0)
 
         with torch.no_grad():
             model.eval()
@@ -144,12 +132,10 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
                 labels = labels.to(device)
                 outputs = model(inputs)
                 loss = loss_function(outputs, labels)
-                valid_loss += loss.item() * inputs.size(0)
-                ret, predictions = torch.max(outputs.data, 1)
-                correct_counts = predictions.eq(
-                    labels.data.view_as(predictions))
-                acc = torch.mean(correct_counts.type(torch.FloatTensor))
-                valid_acc += acc.item() * inputs.size(0)
+                valid_loss += loss.item()
+                pred = torch.max(outputs, 1)[1]
+                num_correct = (pred == labels).sum()
+                valid_acc += num_correct.item()
 
         avg_train_loss = train_loss / train_data_size
         avg_train_acc = train_acc / train_data_size
