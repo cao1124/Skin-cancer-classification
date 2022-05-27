@@ -95,11 +95,13 @@ class iNaturalistDataLoader(DataLoader):
             # dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_train.txt', train_trsfm)
             # val_dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_val.txt', test_trsfm)
             dataset = LT_Dataset(data_dir, data_dir + '/data1326.txt', train_trsfm)
-            train_dataset, val_dataset = random_split(dataset, lengths=[8, 2],
+            train_dataset, val_dataset = random_split(dataset, lengths=[int(len(dataset.img_path) * 0.8) + 1,
+                                                                       int(len(dataset.img_path) * 0.2)],
                                                       generator=torch.Generator().manual_seed(0))
         else:   # test
             dataset = LT_Dataset(data_dir, data_dir + '/data1326.txt', train_trsfm)
-            train_dataset, val_dataset = random_split(dataset, lengths=[8, 2],
+            train_dataset, val_dataset = random_split(dataset, lengths=[int(len(dataset.img_path) * 0.8) + 1,
+                                                                       int(len(dataset.img_path) * 0.2)],
                                                       generator=torch.Generator().manual_seed(0))
 
         self.dataset = train_dataset
