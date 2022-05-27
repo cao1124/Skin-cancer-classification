@@ -42,16 +42,16 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 5,
+            "T_max": 50,
             "eta_min": 0.0
         }
     },
     "resume_state_dict_only": true,
     "trainer": {
-        "epochs": 10,
+        "epochs": 100,
 
         "save_dir": "saved/",
-        "save_period": 5,
+        "save_period": 50,
         "verbosity": 2,
         
         "monitor": "max val_accuracy",
