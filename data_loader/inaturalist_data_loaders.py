@@ -100,7 +100,7 @@ class iNaturalistDataLoader(DataLoader):
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))
         else:   # test
-            dataset = LT_Dataset(data_dir, data_dir + '/data1326.txt', train_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/data1326.txt', test_trsfm)
             n_val = int(len(dataset) * 0.2)
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))
