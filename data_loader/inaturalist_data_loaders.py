@@ -77,7 +77,7 @@ class iNaturalistDataLoader(DataLoader):
     """
     def __init__(self, data_dir, batch_size, shuffle=True, num_workers=1, training=True, balanced=False, retain_epoch_size=True):
         train_trsfm = transforms.Compose([
-            transforms.Resize(256),
+            transforms.Resize(224),
             # transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
