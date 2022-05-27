@@ -11,6 +11,18 @@ from data_loader.inaturalist_data_loaders import LT_Dataset
 
 def split_data():
     dataset = LT_Dataset('data/us_img_crop/', 'data/us_img_crop/data1326.txt')
+    n_val = int(len(dataset) * 0.2)
+    n_train = len(dataset) - n_val
+    train_list, val_list = random_split(dataset, lengths=[n_train, n_val],
+                                              generator=torch.Generator().manual_seed(0))
+    train_dataset = []
+    for i in list(train_list.indices):
+        train_dataset.append(dataset[i])
+    print('.')
+
+
+def split_five():
+    dataset = LT_Dataset('data/us_img_crop/', 'data/us_img_crop/data1326.txt')
     data1, data2, data3, data4, data5 = random_split(dataset, lengths=[int(len(dataset.img_path) * 0.2) + 1,
                                                                        int(len(dataset.img_path) * 0.2),
                                                                        int(len(dataset.img_path) * 0.2),

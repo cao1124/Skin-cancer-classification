@@ -51,7 +51,7 @@ class LT_Dataset(Dataset):
                 # self.labels.append(int(line.split()[1]))
                 self.img_path.append(os.path.join(root, line.split(',')[0]))
                 self.labels.append(int(line.split(',')[1]))
-        self.targets = self.labels # Sampler needs to use targets
+        self.targets = self.labels  # Sampler needs to use targets
         
     def __len__(self):
         return len(self.labels)
@@ -77,7 +77,7 @@ class iNaturalistDataLoader(DataLoader):
     """
     def __init__(self, data_dir, batch_size, shuffle=True, num_workers=1, training=True, balanced=False, retain_epoch_size=True):
         train_trsfm = transforms.Compose([
-            transforms.Resize(224),
+            transforms.Resize(512),   # 224
             # transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
@@ -85,7 +85,7 @@ class iNaturalistDataLoader(DataLoader):
             # transforms.Normalize([0.466, 0.471, 0.380], [0.195, 0.194, 0.192])
         ])
         test_trsfm = transforms.Compose([
-            transforms.Resize(256),
+            transforms.Resize(512),    # 256
             # transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
@@ -96,25 +96,28 @@ class iNaturalistDataLoader(DataLoader):
             # dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_train.txt', train_trsfm)
             # val_dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_val.txt', test_trsfm)
             dataset = LT_Dataset(data_dir, data_dir + '/data1326.txt', train_trsfm)
-            train_dataset, val_dataset = random_split(dataset, lengths=[int(len(dataset.img_path) * 0.8) + 1,
-                                                                       int(len(dataset.img_path) * 0.2)],
-                                                      generator=torch.Generator().manual_seed(0))
+            n_val = int(len(dataset) * 0.2)
+            n_train = len(dataset) - n_val
+            train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))
         else:   # test
             dataset = LT_Dataset(data_dir, data_dir + '/data1326.txt', train_trsfm)
-            train_dataset, val_dataset = random_split(dataset, lengths=[int(len(dataset.img_path) * 0.8) + 1,
-                                                                       int(len(dataset.img_path) * 0.2)],
-                                                      generator=torch.Generator().manual_seed(0))
+            n_val = int(len(dataset) * 0.2)
+            n_train = len(dataset) - n_val
+            train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))
 
         self.dataset = train_dataset
         self.val_dataset = val_dataset
 
         self.n_samples = len(self.dataset)
-        num_classes = len(np.unique(dataset.targets))
+        target_list = []
+        for i in list(train_dataset.indices):
+            target_list.append(dataset.targets[i])
+        num_classes = len(np.unique(target_list))
         # assert num_classes == 8142
         assert num_classes == 22
 
         cls_num_list = [0] * num_classes
-        for label in dataset.targets:
+        for label in target_list:
             cls_num_list[label] += 1
 
         self.cls_num_list = cls_num_list
@@ -142,6 +145,6 @@ class iNaturalistDataLoader(DataLoader):
         # Note that sampler does not apply to validation set
 
     def split_validation(self):
-        return None
+        # return None
         # If you want to validate:
-        # return DataLoader(dataset=self.val_dataset, **self.init_kwargs)
+        return DataLoader(dataset=self.val_dataset, **self.init_kwargs)
