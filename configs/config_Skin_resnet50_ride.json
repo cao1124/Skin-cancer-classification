@@ -9,14 +9,14 @@
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
-            "num_experts": 9
+            "num_experts": 6
         }
     },
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
             "data_dir": "data/us_img_crop/",
-            "batch_size": 64,
+            "batch_size": 96,
             "shuffle": true,
             "num_workers": 8
         }
@@ -37,7 +37,7 @@
         "args": {
             "reweight": true,
             "reweight_factor": 0.015,
-            "reweight_epoch": 400
+            "reweight_epoch": 240
         }
     },
     "metrics": [
@@ -46,14 +46,14 @@
     "lr_scheduler": {
         "type": "CustomLR",
         "args": {
-            "step1": 200,
-            "step2": 400,
+            "step1": 120,
+            "step2": 240,
             "gamma": 0.1,
             "warmup_epoch": 30
         }
     },
     "trainer": {
-        "epochs": 500,
+        "epochs": 300,
 
         "save_dir": "saved/",
         "save_period": 100,
