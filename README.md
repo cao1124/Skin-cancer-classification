@@ -133,7 +133,7 @@ Note: different runs will result in different EA modules with different trade-of
 ##### cRT (load from a checkpoint without linear and freezes the pretrained parameters)
 This part is not finalized and will probably change.
 ```
-python train.py --load_crt path_to_cRT_checkpoint -c path_to_config --reduce_dimension 1 --num_experts 3
+python resnet_train.py --load_crt path_to_cRT_checkpoint -c path_to_config --reduce_dimension 1 --num_experts 3
 ```
 
 ##### t-norm
