@@ -78,13 +78,14 @@ class iNaturalistDataLoader(DataLoader):
     def __init__(self, data_dir, batch_size, shuffle=True, num_workers=1, training=True, balanced=False, retain_epoch_size=True):
         train_trsfm = transforms.Compose([
             # transforms.RandomResizedCrop(224),
+            transforms.Resize(512),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
             # transforms.Normalize([0.466, 0.471, 0.380], [0.195, 0.194, 0.192])
         ])
         test_trsfm = transforms.Compose([
-            # transforms.Resize(256),
+            transforms.Resize(512),
             # transforms.CenterCrop(224),
             transforms.ToTensor(),
             transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
