@@ -6,6 +6,8 @@ from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset, Sampler, random_split
 from PIL import Image
 
+from utils import AddGaussianNoise
+
 
 class BalancedSampler(Sampler):
     def __init__(self, buckets, retain_epoch_size=False):
@@ -77,12 +79,15 @@ class iNaturalistDataLoader(DataLoader):
     """
     def __init__(self, data_dir, batch_size, shuffle=True, num_workers=1, training=True, balanced=False, retain_epoch_size=True):
         train_trsfm = transforms.Compose([
-            transforms.Resize([224, 224]),   # 224
-            # transforms.RandomResizedCrop(224),
-            transforms.RandomHorizontalFlip(),
+            transforms.Resize([224, 224]),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+            transforms.RandomRotation(90),
+            AddGaussianNoise(0., 1.),
+            transforms.ColorJitter(),
             transforms.ToTensor(),
+            transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
             transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
-            # transforms.Normalize([0.466, 0.471, 0.380], [0.195, 0.194, 0.192])
         ])
         test_trsfm = transforms.Compose([
             transforms.Resize([224, 224]),    # 256

@@ -6,7 +6,8 @@ from itertools import repeat
 from collections import OrderedDict
 
 # WARNING: 
-# There is no guarantee that it will work or be used on a model. Please do use it with caution unless you make sure everything is working.
+# There is no guarantee that it will work or be used on a model.
+# Please do use it with caution unless you make sure everything is working.
 use_fp16 = False
 
 if use_fp16:
@@ -26,6 +27,7 @@ else:
 
     autocast = Autocast()
 
+
 def rename_parallel_state_dict(state_dict):
     count = 0
     for k in list(state_dict.keys()):
@@ -37,6 +39,7 @@ def rename_parallel_state_dict(state_dict):
     if count > 0:
         print("Detected DataParallel: Renamed {} parameters".format(count))
     return count
+
 
 def load_state_dict(model, state_dict, no_ignore=False):
     own_state = model.state_dict()
@@ -59,25 +62,30 @@ def load_state_dict(model, state_dict, no_ignore=False):
         print("Warning: Model has {} parameters, copied {} from state dict".format(len(own_state), count))
     return count
 
+
 def ensure_dir(dirname):
     dirname = Path(dirname)
     if not dirname.is_dir():
         dirname.mkdir(parents=True, exist_ok=False)
+
 
 def read_json(fname):
     fname = Path(fname)
     with fname.open('rt', encoding='UTF-8') as handle:
         return json.load(handle, object_hook=OrderedDict)
 
+
 def write_json(content, fname):
     fname = Path(fname)
     with fname.open('wt') as handle:
         json.dump(content, handle, indent=4, sort_keys=False)
 
+
 def inf_loop(data_loader):
     ''' wrapper function for endless data loader. '''
     for loader in repeat(data_loader):
         yield from loader
+
 
 class MetricTracker:
     def __init__(self, *keys, writer=None):
@@ -103,3 +111,21 @@ class MetricTracker:
     
     def result(self):
         return dict(self._data.average)
+
+
+class AddGaussianNoise(object):
+
+    def __init__(self, mean=0.0, variance=1.0, amplitude=1.0):
+        self.mean = mean
+        self.variance = variance
+        self.amplitude = amplitude
+
+    def __call__(self, img):
+        img = np.array(img)
+        h, w, c = img.shape
+        N = self.amplitude * np.random.normal(loc=self.mean, scale=self.variance, size=(h, w, 1))
+        N = np.repeat(N, c, axis=2)
+        img = N + img
+        img[img > 255] = 255  # 避免有值超过255而反转
+        img = Image.fromarray(img.astype('uint8')).convert('RGB')
+        return img
