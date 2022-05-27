@@ -113,7 +113,7 @@ class iNaturalistDataLoader(DataLoader):
         self.dataset = train_dataset
         self.val_dataset = val_dataset
 
-        self.n_samples = len(self.dataset)
+        self.n_samples = len(self.dataset) - 1
         target_list = []
         for i in list(train_dataset.indices):
             target_list.append(dataset.targets[i])
