@@ -70,15 +70,15 @@ def prepare_train(data_dir):
     train_data_size = len(train_dataset.indices)
     valid_data_size = len(val_dataset.indices)
 
-    train_data = DataLoader(train_dataset, batch_size=128,
+    train_data = DataLoader(train_dataset, batch_size=64,
                             shuffle=True, num_workers=8)
-    valid_data = DataLoader(val_dataset, batch_size=128,
+    valid_data = DataLoader(val_dataset, batch_size=64,
                             shuffle=False, num_workers=8)
 
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    resnet = models.resnet18(pretrained=True)
+    resnet = models.resnet34(pretrained=True)
 
     resnet.fc = nn.Linear(in_features=512, out_features=22, bias=True)
     # renet18 resnet34
