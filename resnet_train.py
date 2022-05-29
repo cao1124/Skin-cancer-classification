@@ -78,7 +78,7 @@ def prepare_train(data_dir):
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    resnet = models.resnet34(pretrained=True)
+    resnet = models.resnet50(pretrained=True)
 
     resnet.fc = nn.Linear(in_features=512, out_features=22, bias=True)
     # renet18 resnet34
