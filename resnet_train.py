@@ -164,9 +164,8 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
                 100, avg_valid_loss, avg_valid_acc * 100, epoch_end - epoch_start
             ))
 
-        print('Best train accuracy', train_acc)
-        print("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(
-            best_acc, best_epoch))
+        print("Best Accuracy for validation : {:.4f}".format(train_acc))
+        print("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_acc, best_epoch))
 
     return model, history
 
