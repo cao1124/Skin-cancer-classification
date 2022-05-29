@@ -48,7 +48,6 @@ def prepare_train(data_dir):
             transforms.RandomVerticalFlip(p=0.5),
             transforms.RandomRotation(90),
             transforms.ColorJitter(),
-
             transforms.ToTensor(),
             transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
             transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])]),
@@ -81,7 +80,7 @@ def prepare_train(data_dir):
     # 迁移学习  这里使用ResNet-50的预训练模型。
     resnet50 = models.resnet18(pretrained=True)
 
-    resnet50.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    resnet50.fc = nn.Linear(out_features=22, bias=True)  # in_features=2048,
     resnet50.to(device)
 
     # 定义损失函数和优化器。
