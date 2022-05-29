@@ -96,8 +96,8 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
     # device = torch.device('cpu')
 
     history = []
-    best_acc = 0.0
-    tran_acc = 0.0
+    best_val_acc = 0.0
+    best_tran_acc = 0.0
     best_epoch = 0
 
     for epoch in range(epochs):
@@ -148,11 +148,11 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
         history.append([avg_train_loss, avg_valid_loss,
                         avg_train_acc, avg_valid_acc])
 
-        if tran_acc < avg_train_acc:
-            tran_acc = avg_train_acc
+        if best_tran_acc < avg_train_acc:
+            best_tran_acc = avg_train_acc
 
-        if best_acc < avg_valid_acc:
-            best_acc = avg_valid_acc
+        if best_val_acc < avg_valid_acc:
+            best_val_acc = avg_valid_acc
             best_epoch = epoch + 1
             torch.save(model,
                        'best_model_.pt')
@@ -164,8 +164,8 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
                 100, avg_valid_loss, avg_valid_acc * 100, epoch_end - epoch_start
             ))
 
-        print("Best Accuracy for validation : {:.4f}".format(train_acc))
-        print("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_acc, best_epoch))
+        print("Best Accuracy for train : {:.4f}".format(best_tran_acc))
+        print("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_val_acc, best_epoch))
 
     return model, history
 
