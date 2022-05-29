@@ -70,9 +70,9 @@ def prepare_train(data_dir):
     train_data_size = len(train_dataset.indices)
     valid_data_size = len(val_dataset.indices)
 
-    train_data = DataLoader(train_dataset, batch_size=64,
+    train_data = DataLoader(train_dataset, batch_size=58,
                             shuffle=True, num_workers=8)
-    valid_data = DataLoader(val_dataset, batch_size=64,
+    valid_data = DataLoader(val_dataset, batch_size=58,
                             shuffle=False, num_workers=8)
 
     print(train_data_size, valid_data_size)
