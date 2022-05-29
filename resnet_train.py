@@ -70,9 +70,9 @@ def prepare_train(data_dir):
     train_data_size = len(train_dataset.indices)
     valid_data_size = len(val_dataset.indices)
 
-    train_data = DataLoader(train_dataset, batch_size=64,
+    train_data = DataLoader(train_dataset, batch_size=128,
                             shuffle=True, num_workers=8)
-    valid_data = DataLoader(val_dataset, batch_size=64,
+    valid_data = DataLoader(val_dataset, batch_size=128,
                             shuffle=False, num_workers=8)
 
     print(train_data_size, valid_data_size)
@@ -81,8 +81,10 @@ def prepare_train(data_dir):
     resnet = models.resnet18(pretrained=True)
 
     resnet.fc = nn.Linear(in_features=512, out_features=22, bias=True)
-    # renet18 resnet34 (fc): nn.Linear(in_features=512, out_features=1000, bias=True)
-    # resnet50 resnet101  resnet152 (fc): nn.Linear(in_features=2048, out_features=22, bias=True)
+    # renet18 resnet34
+    # (fc): nn.Linear(in_features=512, out_features=1000, bias=True)
+    # resnet50 resnet101  resnet152 resnext50_32x4d wide_resnet50_2  resnext101_32x8d  wide_resnet101_2
+    # (fc): nn.Linear(in_features=2048, out_features=22, bias=True)
     resnet.to(device)
 
     # 定义损失函数和优化器。
