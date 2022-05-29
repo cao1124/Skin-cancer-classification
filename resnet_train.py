@@ -78,15 +78,17 @@ def prepare_train(data_dir):
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    resnet50 = models.resnet18(pretrained=True)
+    resnet = models.resnet18(pretrained=True)
 
-    resnet50.fc = nn.Linear(out_features=22, bias=True)  # in_features=2048,
-    resnet50.to(device)
+    resnet.fc = nn.Linear(in_features=512, out_features=22, bias=True)
+    # renet18 resnet34 (fc): nn.Linear(in_features=512, out_features=1000, bias=True)
+    # resnet50 resnet101  resnet152 (fc): nn.Linear(in_features=2048, out_features=22, bias=True)
+    resnet.to(device)
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(resnet50.parameters(), lr=0.001)
-    return train_data, train_data_size, valid_data, valid_data_size, resnet50, optimizer, loss_func
+    optimizer = optim.SGD(resnet.parameters(), lr=0.001)
+    return train_data, train_data_size, valid_data, valid_data_size, resnet, optimizer, loss_func
 
 
 def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
@@ -167,10 +169,10 @@ if __name__ == '__main__':
 
     num_epochs = 300
     data_dir = 'data/us_img_crop/'
-    train_data, train_data_size, valid_data, valid_data_size, resnet50, optimizer, loss_func = prepare_train(
+    train_data, train_data_size, valid_data, valid_data_size, model, optimizer, loss_func = prepare_train(
         data_dir)
     trained_model, history = train_and_valid(
-        train_data, train_data_size, valid_data, valid_data_size, resnet50, optimizer, loss_func, num_epochs)
+        train_data, train_data_size, valid_data, valid_data_size, model, optimizer, loss_func, num_epochs)
 
     history = np.array(history)
     plt.plot(history[:, 0:2])
