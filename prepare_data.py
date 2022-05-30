@@ -115,15 +115,36 @@ def object_detect(img_path, image):
 
 
 def prepare_img():
-    img_dir = 'data/us_img/'
+    img_dir = 'data/us_img_crop/'
     images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]
     for img_path in images:
         print(img_path)
         # img = Image.open(img).convert('RGB')
         img = cv_imread(img_path)
-        object_detect(img_path, img)
+        # cv2.imshow('img', img)
+        # cv2.waitKey(0)
+        ultrasound_preprocess_data(img_path, img)
+        # object_detect(img_path, img)
+
+
+def ultrasound_preprocess_data(img_path, img):
+    # RGB2GRAY
+    img_gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    # bilateralFilter 双边滤波 对边缘信息较好的保留
+    filter_img = cv2.bilateralFilter(img_gray, 9, 75, 75)
+    # equalize hist 直方图均衡化
+    equal_img = cv2.equalizeHist(filter_img)
+    # binary 二值化
+    blur = cv2.GaussianBlur(equal_img, (5, 5), 0)
+    ret, th = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    # convert back to RGB form
+    revert = cv2.cvtColor(th, cv2.COLOR_GRAY2RGB)
+    # cv2.imshow('revert', revert)
+    # cv2.waitKey(0)
+    new_path = 'data/us_img_crop_process/' + img_path.split('/')[2]
+    cv_write(new_path, revert)
 
 
 if __name__ == '__main__':
-    split_data()
-    # prepare_img()
+    # split_data()
+    prepare_img()

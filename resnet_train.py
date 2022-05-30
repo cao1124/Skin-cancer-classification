@@ -139,7 +139,7 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
+            # scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
 
         with torch.no_grad():
             model.eval()
