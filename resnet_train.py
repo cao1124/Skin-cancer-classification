@@ -94,9 +94,9 @@ def prepare_train(data_dir):
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
     # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
-    # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
+    scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
-    scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[120, 240], gamma=0.1)
+    # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[120, 240], gamma=0.1)
     return train_data, train_data_size, valid_data, valid_data_size, resnet, optimizer, scheduler, loss_func
 
 
