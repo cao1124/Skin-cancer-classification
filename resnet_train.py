@@ -1,5 +1,6 @@
 import os
 import torch
+from torch.optim import lr_scheduler
 from torchvision import models, transforms
 import torch.nn as nn
 import torch.optim as optim
@@ -78,7 +79,7 @@ def prepare_train(data_dir):
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    resnet = models.wide_resnet101_2(pretrained=True)
+    resnet = models.resnet50(pretrained=True)
 
     resnet.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # renet18 resnet34
@@ -89,12 +90,18 @@ def prepare_train(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(resnet.parameters(), lr=0.001)
-    return train_data, train_data_size, valid_data, valid_data_size, resnet, optimizer, loss_func
+    optimizer = optim.SGD(resnet.parameters(), lr=0.001, momentum=0.9)
+    # 定义学习率与轮数关系的函数
+    # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
+    # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
+    # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
+    # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
+    scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[120, 240], gamma=0.1)
+    return train_data, train_data_size, valid_data, valid_data_size, resnet, optimizer, scheduler, loss_func
 
 
 def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
-                    model, optimizer, loss_function, epochs=25):
+                    model, optimizer, scheduler, loss_function, epochs=25):
     # device = torch.device('cpu')
 
     history = []
@@ -127,6 +134,7 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+            scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
 
         with torch.no_grad():
             model.eval()
@@ -177,24 +185,24 @@ if __name__ == '__main__':
 
     num_epochs = 300
     data_dir = 'data/us_img_crop/'
-    train_data, train_data_size, valid_data, valid_data_size, model, optimizer, loss_func = prepare_train(
+    train_data, train_data_size, valid_data, valid_data_size, model, optimizer, scheduler, loss_func = prepare_train(
         data_dir)
     trained_model, history = train_and_valid(
-        train_data, train_data_size, valid_data, valid_data_size, model, optimizer, loss_func, num_epochs)
-
-    history = np.array(history)
-    plt.plot(history[:, 0:2])
-    plt.legend(['Tr Loss', 'Val Loss'])
-    plt.xlabel('Epoch Number')
-    plt.ylabel('Loss')
-    plt.ylim(0, 1)
-    plt.savefig('ResNet' + '_loss_curve.png')
-    plt.show()
-
-    plt.plot(history[:, 2:4])
-    plt.legend(['Tr Accuracy', 'Val Accuracy'])
-    plt.xlabel('Epoch Number')
-    plt.ylabel('Accuracy')
-    plt.ylim(0, 1)
-    plt.savefig('ResNet' + '_accuracy_curve.png')
-    plt.show()
+        train_data, train_data_size, valid_data, valid_data_size, model, optimizer, scheduler, loss_func, num_epochs)
+    #
+    # history = np.array(history)
+    # plt.plot(history[:, 0:2])
+    # plt.legend(['Tr Loss', 'Val Loss'])
+    # plt.xlabel('Epoch Number')
+    # plt.ylabel('Loss')
+    # plt.ylim(0, 1)
+    # plt.savefig('ResNet' + '_loss_curve.png')
+    # plt.show()
+    #
+    # plt.plot(history[:, 2:4])
+    # plt.legend(['Tr Accuracy', 'Val Accuracy'])
+    # plt.xlabel('Epoch Number')
+    # plt.ylabel('Accuracy')
+    # plt.ylim(0, 1)
+    # plt.savefig('ResNet' + '_accuracy_curve.png')
+    # plt.show()
