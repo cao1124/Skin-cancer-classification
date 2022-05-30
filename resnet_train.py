@@ -71,16 +71,16 @@ def prepare_train(data_dir):
     train_data_size = len(train_dataset.indices)
     valid_data_size = len(val_dataset.indices)
 
-    train_data = DataLoader(train_dataset, batch_size=32,
+    train_data = DataLoader(train_dataset, batch_size=64,
                             shuffle=True, num_workers=8)
-    valid_data = DataLoader(val_dataset, batch_size=32,
+    valid_data = DataLoader(val_dataset, batch_size=64,
                             shuffle=False, num_workers=8)
 
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    resnet = models.wide_resnet101_2(pretrained=True)
-    resnet.classifier = nn.Linear(in_features=2048, out_features=22, bias=True)
+    resnet = models.densenet121(pretrained=True)
+    resnet.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
     # resnet.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # renet18 resnet34
     # (fc): nn.Linear(in_features=512, out_features=1000, bias=True)
@@ -95,14 +95,15 @@ def prepare_train(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(resnet.parameters(), lr=0.01, momentum=0.9)
+    optimizer = optim.SGD(resnet.parameters(), lr=0.01)   # , momentum=0.9
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
     # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[120, 240], gamma=0.1)
-    return train_data, train_data_size, valid_data, valid_data_size, resnet, optimizer, scheduler, loss_func
+    return train_data, train_data_size, valid_data, valid_data_size, resnet, \
+           optimizer, scheduler, loss_func
 
 
 def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
