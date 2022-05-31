@@ -81,7 +81,7 @@ def prepare_train(data_dir):
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
     model = models.densenet201(pretrained=True)
-    model.classifier = nn.Linear(in_features=1664, out_features=22, bias=True)
+    model.classifier = nn.Linear(in_features=1920, out_features=22, bias=True)
     # model = densenet264(pretrained=True)
     # model.out = paddle.nn.Linear(in_features=2688, out_features=22)
     # resnet.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
