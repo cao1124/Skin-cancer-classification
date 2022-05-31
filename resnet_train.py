@@ -139,6 +139,7 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
             labels = data[1].to(device)
 
             outputs = model(inputs)
+            outputs = outputs.logits  # inception-v3 TypeError
             loss = loss_function(outputs, labels)
             train_loss += loss.item()
             pred = torch.max(outputs, 1)[1]
