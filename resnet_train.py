@@ -45,7 +45,7 @@ def prepare_train(data_dir):
     # 数据增强
     image_transforms = {
         'train': transforms.Compose([
-            transforms.Resize([299, 299]),   # inception v3 resize change 224 to 299
+            transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomVerticalFlip(p=0.5),
             transforms.RandomRotation(90),
