@@ -78,8 +78,8 @@ class Stem_v4_Res2(nn.Module):
         out = torch.cat((tmp1, tmp2), 1)
         tmp1 = self.step4_pool(out)
         tmp2 = self.step4_conv(out)
-        print(tmp1.shape)
-        print(tmp2.shape)
+        # print(tmp1.shape)
+        # print(tmp2.shape)
         out = torch.cat((tmp1, tmp2), 1)
         return out
 
@@ -446,6 +446,6 @@ class Inception(nn.Module):
         out = F.avg_pool2d(out, 8)
         out = F.dropout(out, 0.2, training=self.training)
         out = out.view(out.size(0), -1)
-        print(out.shape)
+        # print(out.shape)
         out = self.fc(out)
         return F.softmax(out)
