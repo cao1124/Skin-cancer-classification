@@ -12,6 +12,8 @@ from tqdm import tqdm
 from PIL import Image
 import paddle
 from paddle.vision.models import densenet264
+import warnings
+warnings.filterwarnings("ignore")
 
 
 class SkinDataset(Dataset):
