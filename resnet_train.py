@@ -17,7 +17,7 @@ class SkinDataset(Dataset):
     def __init__(self, root, txt, transforms=None):
         self.img_path = []
         self.labels = []
-        self.transforms = transforms['train']
+        self.transforms = transforms
         with open(txt, 'r', encoding='gb2312') as f:
             for line in f:
                 # print(line)
