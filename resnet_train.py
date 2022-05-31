@@ -17,7 +17,7 @@ class SkinDataset(Dataset):
     def __init__(self, root, txt, transforms=None):
         self.img_path = []
         self.labels = []
-        self.transforms = transforms['train']
+        self.transforms = transforms
         with open(txt, 'r', encoding='gb2312') as f:
             for line in f:
                 # print(line)
@@ -59,10 +59,18 @@ def prepare_train(data_dir):
             transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
         ])
     }
+    '''for inception-v3'''
+    inception_transform = transforms.Compose([
+        transforms.Resize(299),
+        transforms.CenterCrop(299),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                             std=[0.229, 0.224, 0.225])
+    ])
 
     # DataLoader
     dataset = SkinDataset(data_dir, data_dir +
-                          '/data1326.txt', image_transforms)
+                          '/data1326.txt', inception_transform)     # image_transforms['train']
 
     n_val = int(len(dataset) * 0.2)
     n_train = len(dataset) - n_val
