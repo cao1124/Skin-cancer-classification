@@ -10,6 +10,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from PIL import Image
+import paddle
+from paddle.vision.models import densenet264
 
 
 class SkinDataset(Dataset):
@@ -75,12 +77,13 @@ def prepare_train(data_dir):
                             shuffle=True, num_workers=8)
     valid_data = DataLoader(val_dataset, batch_size=32,
                             shuffle=False, num_workers=8)
-
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    resnet = models.densenet169(pretrained=True)
-    resnet.classifier = nn.Linear(in_features=1664, out_features=22, bias=True)
+    model = models.densenet201(pretrained=True)
+    model.classifier = nn.Linear(in_features=1664, out_features=22, bias=True)
+    # model = densenet264(pretrained=True)
+    # model.out = paddle.nn.Linear(in_features=2688, out_features=22)
     # resnet.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # renet18 resnet34
     # (fc): nn.Linear(in_features=512, out_features=1000, bias=True)
@@ -91,18 +94,18 @@ def prepare_train(data_dir):
     # densenet 169  in_features=1664
     # densenet 201  in_features=1920
     # (classifier): Linear(in_features=1024, out_features=22, bias=True)
-    resnet.to(device)
+    model.to(device)
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(resnet.parameters(), lr=0.01)   # , momentum=0.9
+    optimizer = optim.SGD(model.parameters(), lr=0.01)   # , momentum=0.9
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
     # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[120, 240], gamma=0.1)
-    return train_data, train_data_size, valid_data, valid_data_size, resnet, \
+    return train_data, train_data_size, valid_data, valid_data_size, model, \
            optimizer, scheduler, loss_func
 
 
