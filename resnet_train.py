@@ -71,18 +71,18 @@ def prepare_train(data_dir):
     train_data_size = len(train_dataset.indices)
     valid_data_size = len(val_dataset.indices)
 
-    train_data = DataLoader(train_dataset, batch_size=6,
+    train_data = DataLoader(train_dataset, batch_size=64,
                             shuffle=True, num_workers=8)
-    valid_data = DataLoader(val_dataset, batch_size=6,
+    valid_data = DataLoader(val_dataset, batch_size=64,
                             shuffle=False, num_workers=8)
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    def inception_v4(classes=22):
-        return Inception("v4", classes)
-    model = inception_v4()
-    #model = models.inception_v3(pretrained=True)
-    #model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    # def inception_v4(classes=22):
+    #     return Inception("v4", classes)
+    # model = inception_v4()
+    model = models.shufflenet_v2_x0_5(pretrained=True)
+    model.fc = nn.Linear(in_features=1024, out_features=22, bias=True)
     # model = densenet264(pretrained=True)
     # model.out = paddle.nn.Linear(in_features=2688, out_features=22)
 
