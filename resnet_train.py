@@ -6,12 +6,9 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, random_split, Dataset
 import time
-import numpy as np
-import matplotlib.pyplot as plt
+from model.inception import Inception
 from tqdm import tqdm
 from PIL import Image
-import paddle
-from paddle.vision.models import densenet264
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -82,10 +79,14 @@ def prepare_train(data_dir):
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.densenet201(pretrained=True)
-    model.classifier = nn.Linear(in_features=1920, out_features=22, bias=True)
+    # def inception_v4(classes=22):
+    #     return Inception("v4", classes)
+    # model = inception_v4()
+    model = models.inception_v3(pretrained=True)
+    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # model = densenet264(pretrained=True)
     # model.out = paddle.nn.Linear(in_features=2688, out_features=22)
+
     # resnet.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # renet18 resnet34
     # (fc): nn.Linear(in_features=512, out_features=1000, bias=True)
@@ -96,6 +97,8 @@ def prepare_train(data_dir):
     # densenet 169  in_features=1664
     # densenet 201  in_features=1920
     # (classifier): Linear(in_features=1024, out_features=22, bias=True)
+    # inception
+    # v3 (fc): Linear(in_features=2048, out_features=1000, bias=True)
     model.to(device)
 
     # 定义损失函数和优化器。
