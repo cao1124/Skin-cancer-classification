@@ -78,10 +78,7 @@ def prepare_train(data_dir):
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    # def inception_v4(classes=22):
-    #     return Inception("v4", classes)
-    # model = inception_v4()
-    model = models.resnet50(pretrained=True)
+    model = models.resnext50_32x4d(pretrained=True)
     model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # for  vit_b_16 vit_l_16
     # model.heads = nn.Sequential(OrderedDict([('head', nn.Linear(in_features=1024, out_features=22, bias=True))]))
@@ -100,6 +97,9 @@ def prepare_train(data_dir):
     # (classifier): Linear(in_features=1024, out_features=22, bias=True)
     # inception
     # v3 (fc): Linear(in_features=2048, out_features=1000, bias=True)
+    # def inception_v4(classes=22):
+    #     return Inception("v4", classes)
+    # model = inception_v4()
     model.to(device)
 
     # 定义损失函数和优化器。
@@ -199,7 +199,7 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
 if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 300
+    num_epochs = 100
     data_dir = 'data/us_img_crop_process/'
     train_data, train_data_size, valid_data, valid_data_size, model, optimizer, scheduler, loss_func = prepare_train(
         data_dir)
