@@ -71,9 +71,9 @@ def prepare_train(data_dir):
     train_data_size = len(train_dataset.indices)
     valid_data_size = len(val_dataset.indices)
 
-    train_data = DataLoader(train_dataset, batch_size=16,
+    train_data = DataLoader(train_dataset, batch_size=64,
                             shuffle=True, num_workers=8)
-    valid_data = DataLoader(val_dataset, batch_size=16,
+    valid_data = DataLoader(val_dataset, batch_size=64,
                             shuffle=False, num_workers=8)
     print(train_data_size, valid_data_size)
 
@@ -81,9 +81,10 @@ def prepare_train(data_dir):
     # def inception_v4(classes=22):
     #     return Inception("v4", classes)
     # model = inception_v4()
-    model = models.vit_l_16(pretrained=True)
-    # model.fc = nn.Linear(in_features=1024, out_features=22, bias=True)
-    model.heads = nn.Sequential(OrderedDict([('head', nn.Linear(in_features=1024, out_features=22, bias=True))]))
+    model = models.resnet50(pretrained=True)
+    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    # for  vit_b_16 vit_l_16
+    # model.heads = nn.Sequential(OrderedDict([('head', nn.Linear(in_features=1024, out_features=22, bias=True))]))
     # model = densenet264(pretrained=True)
     # model.out = paddle.nn.Linear(in_features=2688, out_features=22)
 
@@ -199,7 +200,7 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 300
-    data_dir = 'data/us_img_crop/'
+    data_dir = 'data/us_img_crop_process/'
     train_data, train_data_size, valid_data, valid_data_size, model, optimizer, scheduler, loss_func = prepare_train(
         data_dir)
     trained_model, history = train_and_valid(
