@@ -145,13 +145,13 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
             inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)
             outputs = model(inputs)
             # outputs = outputs.logits  # inception-v3 TypeError
-            loss = loss_function(outputs, labels)
+            loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)
+            # loss = loss_function(outputs, labels)
             train_loss += loss.item()
             pred = torch.max(outputs, 1)[1]
             train_correct = (pred == labels).sum()
             train_acc += train_correct.item()
             optimizer.zero_grad()
-            loss = mixup_criterion(loss, outputs, labels_a, labels_b, lam)
             loss.backward()
             optimizer.step()
             # scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
