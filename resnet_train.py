@@ -204,7 +204,7 @@ if __name__ == '__main__':
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    data_dir = 'data/us_img_crop_process/'
+    data_dir = 'data/us_img_crop/'
     train_data, train_data_size, valid_data, valid_data_size, model, optimizer, scheduler, loss_func = prepare_train(
         data_dir)
     trained_model, history = train_and_valid(
