@@ -81,9 +81,9 @@ def prepare_train(data_dir):
     # def inception_v4(classes=22):
     #     return Inception("v4", classes)
     # model = inception_v4()
-    model = models.vit_b_32(pretrained=True)
+    model = models.vit_l_16(pretrained=True)
     # model.fc = nn.Linear(in_features=1024, out_features=22, bias=True)
-    model.heads = nn.Sequential(OrderedDict([('head', nn.Linear(in_features=768, out_features=22, bias=True))]))
+    model.heads = nn.Sequential(OrderedDict([('head', nn.Linear(in_features=1024, out_features=22, bias=True))]))
     # model = densenet264(pretrained=True)
     # model.out = paddle.nn.Linear(in_features=2688, out_features=22)
 
