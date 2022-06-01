@@ -9,6 +9,8 @@ import time
 from collections import OrderedDict
 from tqdm import tqdm
 from PIL import Image
+from torchtoolbox.tools import mixup_data, mixup_criterion
+from torchtoolbox.transform import Cutout
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -20,8 +22,6 @@ class SkinDataset(Dataset):
         self.transforms = transforms
         with open(txt, 'r', encoding='gb2312') as f:
             for line in f:
-                # print(line)
-
                 self.img_path.append(os.path.join(root, line.split(',')[0]))
                 self.labels.append(int(line.split(',')[1]))
 
@@ -46,6 +46,7 @@ def prepare_train(data_dir):
     image_transforms = {
         'train': transforms.Compose([
             transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
+            Cutout(),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomVerticalFlip(p=0.5),
             transforms.RandomRotation(90),
@@ -134,12 +135,14 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
         train_acc = 0.0
         valid_loss = 0.0
         valid_acc = 0.0
+        alpha = 0.2
 
         # for i, data in enumerate(train_data):
         for step, data in enumerate(tqdm(train_data)):
             inputs = data[0].to(device)
             labels = data[1].to(device)
 
+            inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)
             outputs = model(inputs)
             # outputs = outputs.logits  # inception-v3 TypeError
             loss = loss_function(outputs, labels)
@@ -148,6 +151,7 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
             train_correct = (pred == labels).sum()
             train_acc += train_correct.item()
             optimizer.zero_grad()
+            loss = mixup_criterion(loss, outputs, labels_a, labels_b, lam)
             loss.backward()
             optimizer.step()
             # scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
