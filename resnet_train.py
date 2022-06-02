@@ -110,7 +110,7 @@ def prepare_train(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.01)   # , momentum=0.9
+    optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=2e-4, nesterov=True, momentum=0.9)
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
     # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
