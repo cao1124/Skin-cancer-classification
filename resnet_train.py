@@ -206,7 +206,7 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
 
 
 if __name__ == '__main__':
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    device = torch.device("cuda:0,1" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 300
     data_dir = 'data/us_img_crop/'
