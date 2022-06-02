@@ -79,7 +79,7 @@ def prepare_train(data_dir):
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnext50(pretrained=True)
+    model = models.resnet50(pretrained=True)
     model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # for  vit_b_16 vit_l_16
     # model.heads = nn.Sequential(OrderedDict([('head', nn.Linear(in_features=1024, out_features=22, bias=True))]))
