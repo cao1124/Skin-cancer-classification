@@ -83,7 +83,7 @@ def prepare_train(data_dir):
     # model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
                                           ('relu1', nn.ReLU()),
-                                          ('dropout1', nn.Dropout(0.5)),
+                                          ('dropout1', nn.Dropout(0.8)),
                                           ('fc2', nn.Linear(128, 22)),
                                           ('output', nn.Softmax(dim=1))]))
     # for  vit_b_16 vit_l_16
