@@ -135,7 +135,7 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
         train_acc = 0.0
         valid_loss = 0.0
         valid_acc = 0.0
-        alpha = 0.2
+        alpha = 0.5
 
         # for i, data in enumerate(train_data):
         for step, data in enumerate(tqdm(train_data)):
