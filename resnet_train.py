@@ -106,6 +106,10 @@ def prepare_train(data_dir):
     # def inception_v4(classes=22):
     #     return Inception("v4", classes)
     # model = inception_v4()
+
+    # 多GPU
+    if torch.cuda.device_count() > 1:
+        model = nn.DataParallel(model)
     model.to(device)
 
     # 定义损失函数和优化器。
@@ -206,7 +210,8 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
 
 
 if __name__ == '__main__':
-    device = torch.device("cuda:0,1" if torch.cuda.is_available() else "cpu")
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 300
     data_dir = 'data/us_img_crop/'
