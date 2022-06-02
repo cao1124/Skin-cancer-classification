@@ -79,7 +79,7 @@ def prepare_train(data_dir):
     print(train_data_size, valid_data_size)
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnext50_32x4d(pretrained=True)
+    model = models.resnext50(pretrained=True)
     model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # for  vit_b_16 vit_l_16
     # model.heads = nn.Sequential(OrderedDict([('head', nn.Linear(in_features=1024, out_features=22, bias=True))]))
@@ -142,11 +142,11 @@ def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
             inputs = data[0].to(device)
             labels = data[1].to(device)
 
-            inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)
+            # inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)        # mixup
             outputs = model(inputs)
-            # outputs = outputs.logits  # inception-v3 TypeError
-            loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)
-            # loss = loss_function(outputs, labels)
+            # outputs = outputs.logits                                                   # inception-v3 TypeError
+            # loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)    # mixup
+            loss = loss_function(outputs, labels)
             train_loss += loss.item()
             pred = torch.max(outputs, 1)[1]
             train_correct = (pred == labels).sum()

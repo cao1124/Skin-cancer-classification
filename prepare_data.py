@@ -122,44 +122,32 @@ def object_detect(img_path, image):
             # cv2.waitKey(500)
 
 
-def prepare_img():
-    img_dir = 'data/us_img_crop/'
-    images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]
-    for img_path in images:
-        print(img_path)
-        # img = Image.open(img).convert('RGB')
-        img = cv_imread(img_path)
+def otsu_threshold(img):
+    # Otsu threshold
+    T1, T2, epsT, histCV = doubleThreshold(img)
+    print("T1={}, T2={}, esp={:.4f}".format(T1, T2, epsT))
 
-        # cv2.imshow('img', img)
-        # cv2.waitKey(0)
-        # ultrasound_preprocess_data(img_path, img)
-        object_detect(img_path, img)
+    binary = img.copy()
+    binary[binary < T1] = 0
+    binary[binary > T2] = 255
 
-        # Otsu threshold
-        # T1, T2, epsT, histCV = doubleThreshold(img)
-        # print("T1={}, T2={}, esp={:.4f}".format(T1, T2, epsT))
-        #
-        # binary = img.copy()
-        # binary[binary < T1] = 0
-        # binary[binary > T2] = 255
-        #
-        # ret, imgOtsu = cv2.threshold(img, 127, 255, cv2.THRESH_OTSU)  # OTSU 阈值分割
-        # ret1, binary1 = cv2.threshold(img, T1, 255, cv2.THRESH_TOZERO)  # 小于阈值置 0，大于阈值不变
-        # ret2, binary2 = cv2.threshold(img, T2, 255, cv2.THRESH_TOZERO)
-        #
-        # plt.figure(figsize=(9, 6))
-        # plt.subplot(231), plt.axis('off'), plt.title("Origin"), plt.imshow(img, 'gray')
-        # plt.subplot(232, yticks=[]), plt.axis([0, 255, 0, np.max(histCV)])
-        # plt.bar(range(256), histCV[:, 0]), plt.title("Gray Hist")
-        # plt.subplot(233), plt.title("OTSU binary(T={})".format(round(ret))), plt.axis('off')
-        # plt.imshow(imgOtsu, 'gray')
-        # plt.subplot(234), plt.axis('off'), plt.title("Threshold(T={})".format(T1))
-        # plt.imshow(binary1, 'gray')
-        # plt.subplot(235), plt.axis('off'), plt.title("Threshold(T={})".format(T2))
-        # plt.imshow(binary2, 'gray')
-        # plt.subplot(236), plt.axis('off'), plt.title("DoubleT({},{})".format(T1, T2))
-        # plt.imshow(binary, 'gray')
-        # plt.show()
+    ret, imgOtsu = cv2.threshold(img, 127, 255, cv2.THRESH_OTSU)  # OTSU 阈值分割
+    ret1, binary1 = cv2.threshold(img, T1, 255, cv2.THRESH_TOZERO)  # 小于阈值置 0，大于阈值不变
+    ret2, binary2 = cv2.threshold(img, T2, 255, cv2.THRESH_TOZERO)
+
+    plt.figure(figsize=(9, 6))
+    plt.subplot(231), plt.axis('off'), plt.title("Origin"), plt.imshow(img, 'gray')
+    plt.subplot(232, yticks=[]), plt.axis([0, 255, 0, np.max(histCV)])
+    plt.bar(range(256), histCV[:, 0]), plt.title("Gray Hist")
+    plt.subplot(233), plt.title("OTSU binary(T={})".format(round(ret))), plt.axis('off')
+    plt.imshow(imgOtsu, 'gray')
+    plt.subplot(234), plt.axis('off'), plt.title("Threshold(T={})".format(T1))
+    plt.imshow(binary1, 'gray')
+    plt.subplot(235), plt.axis('off'), plt.title("Threshold(T={})".format(T2))
+    plt.imshow(binary2, 'gray')
+    plt.subplot(236), plt.axis('off'), plt.title("DoubleT({},{})".format(T1, T2))
+    plt.imshow(binary, 'gray')
+    plt.show()
 
 
 def ultrasound_preprocess_data(img_path, img):
@@ -216,6 +204,147 @@ def doubleThreshold(img):
     epsT = varMax / varG  # 可分离测度
     print(totalPixels, mG, varG, varMax, epsT, T1, T2)
     return T1, T2, epsT, histCV
+
+
+def homomorphic_filter(src,d0=70,c=0.1,rh=2.2,h=2.2,r1=0.7,l=0.7):
+    # 同态滤波函数
+    # d0 截止频率，越大图像越亮
+    # r1 低频增益,取值在0和1之间
+    # rh 高频增益,需要大于1
+    # c 锐化系数
+    # 图像灰度化处理
+    gray = src.copy()
+
+    if len(src.shape) > 2:      # 维度>2
+        gray = cv2.cvtColor(src, cv2.COLOR_BGR2GRAY)
+
+    # 图像格式处理
+    gray = np.float64(gray)
+
+    # 设置数据维度n
+    rows, cols = gray.shape
+
+    # 傅里叶变换
+    gray_fft = np.fft.fft2(gray)
+
+    # 将零频点移到频谱的中间，就是中间化处理
+    gray_fftshift = np.fft.fftshift(gray_fft)
+
+    # 生成一个和gray_fftshift一样的全零数据结构
+    dst_fftshift = np.zeros_like(gray_fftshift)
+
+    # arange函数用于创建等差数组，分解f(x,y)=i(x,y)r(x,y)
+    M, N = np.meshgrid(np.arange(-cols // 2, cols // 2), np.arange(-rows//2, rows//2))  # 注意，//就是除法
+
+    # 使用频率增强函数处理原函数（也就是处理原图像dst_fftshift）
+    D = np.sqrt(M ** 2 + N ** 2)
+    Z = (rh - r1) * (1 - np.exp(-c * (D ** 2 / d0 ** 2))) + r1
+    dst_fftshift = Z * gray_fftshift
+    dst_fftshift = (h - l) * dst_fftshift + l
+
+    # 傅里叶反变换（之前是正变换，现在该反变换变回去了）
+    dst_ifftshift = np.fft.ifftshift(dst_fftshift)
+    dst_ifft = np.fft.ifft2(dst_ifftshift)
+
+    # 选取元素的实部
+    dst = np.real(dst_ifft)
+
+    # dst中，比0小的都会变成0，比255大的都变成255
+    # uint8是专门用于存储各种图像的（包括RGB，灰度图像等），范围是从0–255
+    dst = np.uint8(np.clip(dst, 0, 255))
+    return dst
+
+
+def ultrasound_enhance(path, src):
+    # 超声图像直方均衡
+    src_gray = cv2.cvtColor(src, cv2.COLOR_RGB2GRAY)
+    src_eqlzd = cv2.equalizeHist(src_gray)
+    # 同态滤波增强
+    src_homomorphic = homomorphic_filter(src)
+
+    def sameSize(img1, img2):
+        """
+        使得img1的大小与img2相同
+        """
+        rows, cols = img2.shape
+        dst = img1[:rows, :cols]
+        return dst
+
+    # 对apple进行6层高斯降采样
+    G = src_homomorphic.copy()
+    gp_apple = [G]
+    for i in range(6):
+        G = cv2.pyrDown(G)
+        gp_apple.append(G)
+
+    # 对orange进行6层高斯降采样
+    G = src_eqlzd.copy()
+    gp_orange = [G]
+    for j in range(6):
+        G = cv2.pyrDown(G)
+        gp_orange.append(G)
+
+    # 求apple的Laplace金字塔
+    lp_apple = [gp_apple[5]]
+    for i in range(5, 0, -1):
+        GE = cv2.pyrUp(gp_apple[i])
+        L = cv2.subtract(gp_apple[i - 1], sameSize(GE, gp_apple[i - 1]))
+        lp_apple.append(L)
+
+    # 求orange的Laplace金字塔
+    lp_orange = [gp_orange[5]]
+    for i in range(5, 0, -1):
+        GE = cv2.pyrUp(gp_orange[i])
+        L = cv2.subtract(gp_orange[i - 1], sameSize(GE, gp_orange[i - 1]))
+        lp_orange.append(L)
+
+    # 对apple和orange的Laplace金字塔进行1/2拼接
+    LS = []
+    for la, lb in zip(lp_apple, lp_orange):
+        la.astype(int)
+        lb.astype(int)
+        rows, cols = la.shape
+        ls = np.hstack((la[:, 0:cols // 2], lb[:, cols // 2:]))
+        LS.append(ls)
+
+    # 对拼接后的Laplace金字塔重建获取融合后的结果
+    ls_reconstruct = LS[0]
+    for i in range(1, 6):
+        ls_reconstruct = cv2.pyrUp(ls_reconstruct)
+        ls_reconstruct = cv2.add(sameSize(ls_reconstruct, LS[i]), LS[i])
+
+    # 各取1/2直接拼接的结果
+    r, c = src_homomorphic.shape
+    real = np.hstack((src_homomorphic[:, 0:c // 2], src_eqlzd[:, c // 2:]))
+    # 将参数元组的元素数组按水平方向进行叠加，必须用//为整除
+    new_path = 'data/us_img_crop_enhance/' + path.split('/')[2]
+    cv_write(new_path, ls_reconstruct)
+
+    # plt.subplot(221), plt.imshow(cv2.cvtColor(src_homomorphic, cv2.COLOR_BGR2RGB))
+    # plt.title("tongtai"), plt.xticks([]), plt.yticks([])
+    # plt.subplot(222), plt.imshow(cv2.cvtColor(src_eqlzd, cv2.COLOR_BGR2RGB))
+    # plt.title("eqlzd"), plt.xticks([]), plt.yticks([])
+    # plt.subplot(223), plt.imshow(cv2.cvtColor(real, cv2.COLOR_BGR2RGB))
+    # plt.title("real"), plt.xticks([]), plt.yticks([])
+    # plt.subplot(224), plt.imshow(cv2.cvtColor(ls_reconstruct, cv2.COLOR_BGR2RGB))
+    # plt.title("laplace_pyramid"), plt.xticks([]), plt.yticks([])
+    # plt.show()
+
+
+def prepare_img():
+    img_dir = 'data/us_img_crop/'
+    images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]
+    for img_path in images:
+        print(img_path)
+        # img = Image.open(img).convert('RGB')
+        img = cv_imread(img_path)
+
+        # cv2.imshow('img', img)
+        # cv2.waitKey(0)
+        # ultrasound_preprocess_data(img_path, img)     # github ultrasound Image Preprocessing
+        # object_detect(img_path, img)                  # 截取ROI
+        # otsu_threshold(img)                           # 大津阈值预处理
+        ultrasound_enhance(img_path, img)
 
 
 if __name__ == '__main__':
