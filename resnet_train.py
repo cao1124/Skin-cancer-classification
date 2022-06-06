@@ -98,7 +98,7 @@ def prepare_train(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=2e-4, nesterov=True, momentum=0.9)
+    optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=2e-4, momentum=0.9)     # , nesterov=True
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
     # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
@@ -120,10 +120,8 @@ def train_and_valid(dataset, model, optimizer, scheduler, loss_function, epochs=
         train_data_size = len(train_dataset.indices)
         valid_data_size = len(val_dataset.indices)
 
-        train_data = DataLoader(train_dataset, batch_size=64,
-                                shuffle=True, num_workers=8)
-        valid_data = DataLoader(val_dataset, batch_size=64,
-                                shuffle=False, num_workers=8)
+        train_data = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=8)
+        valid_data = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=8)
         logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
 
         history = []
@@ -196,18 +194,20 @@ def train_and_valid(dataset, model, optimizer, scheduler, loss_function, epochs=
             logger.info("Best Accuracy for train : {:.4f}".format(best_tran_acc))
             logger.info("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_val_acc, best_epoch))
 
-    return model, history
+    # return model, history
 
 
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 300
+    num_epochs = 100
     data_dir = 'data/us_label_crop/'
-    dataset, model, optimizer, scheduler, loss_func = prepare_train( data_dir)
-    trained_model, history = train_and_valid(dataset, model, optimizer, scheduler, loss_func, num_epochs)
-    #
+    dataset, model, optimizer, scheduler, loss_func = prepare_train(data_dir)
+    train_and_valid(dataset, model, optimizer, scheduler, loss_func, num_epochs)
+
+    # plt show
+    # trained_model, history =train_and_valid(dataset, model, optimizer, scheduler, loss_func, num_epochs)
     # history = np.array(history)
     # plt.plot(history[:, 0:2])
     # plt.legend(['Tr Loss', 'Val Loss'])
