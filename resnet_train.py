@@ -7,11 +7,10 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, random_split, Dataset
 from tqdm import tqdm
 from PIL import Image
-import logging
+from utils.get_log import _get_logger
 import warnings
 warnings.filterwarnings("ignore")
-logger = logging.getLogger("ResNetTrain")
-logger.addHandler(logging.FileHandler("data/ResNetTrainLog.txt"))
+logger = _get_logger('data/saved/log/TrainLog.txt', 'info')
 
 
 class SkinDataset(Dataset):
@@ -190,7 +189,7 @@ def train_and_valid(dataset, model, optimizer, scheduler, loss_function, epochs=
             if best_val_acc < avg_valid_acc:
                 best_val_acc = avg_valid_acc
                 best_epoch = epoch + 1
-                torch.save(model, 'data/train_best_model' + str(best_epoch) + '.pt')
+                torch.save(model, 'data/saved/checkpoint/train_best_model' + str(best_epoch) + '.pt')
 
             logger.info("Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%".format(
                     epoch + 1, avg_valid_loss, avg_train_acc * 100, avg_valid_loss, avg_valid_acc * 100))
