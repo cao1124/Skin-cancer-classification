@@ -1,5 +1,4 @@
 # encoding:utf-8
-
 import os
 from enum import Enum
 import numpy as np
@@ -8,7 +7,7 @@ import torch
 from matplotlib import pyplot as plt
 from torch.utils.data import random_split
 from data_loader.inaturalist_data_loaders import LT_Dataset
-os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
 def split_data():
@@ -101,7 +100,7 @@ def cv_write(file_path, file):
     cv2.imencode('.bmp', file)[1].tofile(file_path)
 
 
-def object_detect(img_path, image):
+def roi_detect(img_path, image):
     # 灰度图
     img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # 二值化
@@ -111,15 +110,15 @@ def object_detect(img_path, image):
 
     for j, cnts in enumerate(contours):
         x, y, w, h = cv2.boundingRect(cnts)  # 计算点集最外面的矩形边界
-        if w * h > 12000 and h > 300 and w > 300:
+        if h > 200 and w > 200:  # w * h > 12000 and
             crop_img = image[y:y + h, x:x + w]
-            new_path = 'data/us_img_crop/' + img_path.split('/')[2]
+            new_path = 'D:/MAD_File/上海_皮肤病/上海_皮肤病/us_label_crop/' + img_path.split('/')[-1]
             cv_write(new_path, crop_img)
 
             # 在原图上画出最大的矩形
-            # cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 1)
-            # cv2.imshow('image', image)
-            # cv2.waitKey(500)
+            cv2.rectangle(image, (x, y), (x + w, y + h), (0, 255, 0), 1)
+            cv2.imshow('image', image)
+            cv2.waitKey(500)
 
 
 def otsu_threshold(img):
@@ -332,22 +331,23 @@ def ultrasound_enhance(path, src):
 
 
 def prepare_img():
-    img_dir = 'data/us_img_crop/'
+    img_dir = 'D:/MAD_File/上海_皮肤病/上海_皮肤病/us_label_crop/'
     images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]
     for img_path in images:
         print(img_path)
         # img = Image.open(img).convert('RGB')
         img = cv_imread(img_path)
 
-        # cv2.imshow('img', img)
-        # cv2.waitKey(0)
+        cv2.imshow('img', img)
+        cv2.waitKey(0)
         # ultrasound_preprocess_data(img_path, img)     # github ultrasound Image Preprocessing
-        # object_detect(img_path, img)                  # 截取ROI
+        # roi_detect(img_path, img)                  # 截取ROI
         # otsu_threshold(img)                           # 大津阈值预处理
-        ultrasound_enhance(img_path, img)
+        # ultrasound_enhance(img_path, img)
 
 
 if __name__ == '__main__':
-    # split_data()
     prepare_img()
+    # split_data()
+    print('done~')
 

@@ -5,14 +5,13 @@ from torchvision import models, transforms
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, random_split, Dataset
-import time
-from collections import OrderedDict
 from tqdm import tqdm
 from PIL import Image
-from torchtoolbox.tools import mixup_data, mixup_criterion
-from torchtoolbox.transform import Cutout
+import logging
 import warnings
 warnings.filterwarnings("ignore")
+logger = logging.getLogger("ResNetTrain")
+logger.addHandler(logging.FileHandler("ResNetTrainLog.txt"))
 
 
 class SkinDataset(Dataset):
@@ -62,21 +61,7 @@ def prepare_train(data_dir):
     }
 
     # DataLoader
-    dataset = SkinDataset(data_dir, data_dir + '/data1326.txt', image_transforms['train'])
-
-    n_val = int(len(dataset) * 0.2)
-    n_train = len(dataset) - n_val
-    train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val],
-                                              generator=torch.Generator().manual_seed(0))
-
-    train_data_size = len(train_dataset.indices)
-    valid_data_size = len(val_dataset.indices)
-
-    train_data = DataLoader(train_dataset, batch_size=64,
-                            shuffle=True, num_workers=8)
-    valid_data = DataLoader(val_dataset, batch_size=64,
-                            shuffle=False, num_workers=8)
-    print(train_data_size, valid_data_size)
+    dataset = SkinDataset(data_dir, data_dir + '/1342data.txt', image_transforms['train'])
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
     model = models.resnet50(pretrained=True)
@@ -121,90 +106,96 @@ def prepare_train(data_dir):
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[120, 240], gamma=0.1)
-    return train_data, train_data_size, valid_data, valid_data_size, model, \
-           optimizer, scheduler, loss_func
+    return dataset, model, optimizer, scheduler, loss_func
 
 
-def train_and_valid(train_data, train_data_size, valid_data, valid_data_size,
-                    model, optimizer, scheduler, loss_function, epochs=25):
-    # device = torch.device('cpu')
+def train_and_valid(dataset, model, optimizer, scheduler, loss_function, epochs=25):
+    # random split dataset 五折交叉验证
+    n_val = int(len(dataset) * 0.2)
+    n_train = len(dataset) - n_val
+    for i in range(5):
+        logger.info('第{}次实验:'.format(i))
+        train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val],
+                                                  generator=torch.manual_seed(i))
 
-    history = []
-    best_val_acc = 0.0
-    best_tran_acc = 0.0
-    best_epoch = 0
+        train_data_size = len(train_dataset.indices)
+        valid_data_size = len(val_dataset.indices)
 
-    for epoch in range(epochs):
-        epoch_start = time.time()
-        print("Epoch: {}/{}".format(epoch + 1, epochs))
+        train_data = DataLoader(train_dataset, batch_size=64,
+                                shuffle=True, num_workers=8)
+        valid_data = DataLoader(val_dataset, batch_size=64,
+                                shuffle=False, num_workers=8)
+        logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
 
-        model.train()
+        history = []
+        best_val_acc = 0.0
+        best_tran_acc = 0.0
+        best_epoch = 0
 
-        train_loss = 0.0
-        train_acc = 0.0
-        valid_loss = 0.0
-        valid_acc = 0.0
-        alpha = 0.5
+        for epoch in range(epochs):
+            logger.info("Epoch: {}/{}".format(epoch + 1, epochs))
 
-        # for i, data in enumerate(train_data):
-        for step, data in enumerate(tqdm(train_data)):
-            inputs = data[0].to(device)
-            labels = data[1].to(device)
+            model.train()
 
-            # inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)        # mixup
-            outputs = model(inputs)
-            # outputs = outputs.logits                                                   # inception-v3 TypeError
-            # loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)    # mixup
-            loss = loss_function(outputs, labels)
-            train_loss += loss.item()
-            pred = torch.max(outputs, 1)[1]
-            train_correct = (pred == labels).sum()
-            train_acc += train_correct.item()
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-            # scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
+            train_loss = 0.0
+            train_acc = 0.0
+            valid_loss = 0.0
+            valid_acc = 0.0
+            alpha = 0.5
 
-        with torch.no_grad():
-            model.eval()
+            # for i, data in enumerate(train_data):
+            for step, data in enumerate(tqdm(train_data)):
+                inputs = data[0].to(device)
+                labels = data[1].to(device)
 
-            for j, (inputs, labels) in enumerate(tqdm(valid_data)):
-                inputs = inputs.to(device)
-                labels = labels.to(device)
+                # inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)        # mixup
                 outputs = model(inputs)
+                # outputs = outputs.logits                                                   # inception-v3 TypeError
+                # loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)    # mixup
                 loss = loss_function(outputs, labels)
-                valid_loss += loss.item()
+                train_loss += loss.item()
                 pred = torch.max(outputs, 1)[1]
-                num_correct = (pred == labels).sum()
-                valid_acc += num_correct.item()
+                train_correct = (pred == labels).sum()
+                train_acc += train_correct.item()
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                # scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
 
-        avg_train_loss = train_loss / train_data_size
-        avg_train_acc = train_acc / train_data_size
+            with torch.no_grad():
+                model.eval()
 
-        avg_valid_loss = valid_loss / valid_data_size
-        avg_valid_acc = valid_acc / valid_data_size
+                for j, (inputs, labels) in enumerate(tqdm(valid_data)):
+                    inputs = inputs.to(device)
+                    labels = labels.to(device)
+                    outputs = model(inputs)
+                    loss = loss_function(outputs, labels)
+                    valid_loss += loss.item()
+                    pred = torch.max(outputs, 1)[1]
+                    num_correct = (pred == labels).sum()
+                    valid_acc += num_correct.item()
 
-        history.append([avg_train_loss, avg_valid_loss,
-                        avg_train_acc, avg_valid_acc])
+            avg_train_loss = train_loss / train_data_size
+            avg_train_acc = train_acc / train_data_size
 
-        if best_tran_acc < avg_train_acc:
-            best_tran_acc = avg_train_acc
+            avg_valid_loss = valid_loss / valid_data_size
+            avg_valid_acc = valid_acc / valid_data_size
 
-        if best_val_acc < avg_valid_acc:
-            best_val_acc = avg_valid_acc
-            best_epoch = epoch + 1
-            torch.save(model,
-                       'best_model_.pt')
-        epoch_end = time.time()
+            history.append([avg_train_loss, avg_valid_loss,
+                            avg_train_acc, avg_valid_acc])
 
-        print(
-            "Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%, Time: {:.4f}s".format(
-                epoch + 1, avg_valid_loss, avg_train_acc *
-                100, avg_valid_loss, avg_valid_acc * 100, epoch_end - epoch_start
-            ))
+            if best_tran_acc < avg_train_acc:
+                best_tran_acc = avg_train_acc
 
-        print("Best Accuracy for train : {:.4f}".format(best_tran_acc))
-        print("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_val_acc, best_epoch))
+            if best_val_acc < avg_valid_acc:
+                best_val_acc = avg_valid_acc
+                best_epoch = epoch + 1
+                torch.save(model, 'data/train_best_model' + str(best_epoch) + '.pt')
+
+            logger.info("Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%".format(
+                    epoch + 1, avg_valid_loss, avg_train_acc * 100, avg_valid_loss, avg_valid_acc * 100))
+            logger.info("Best Accuracy for train : {:.4f}".format(best_tran_acc))
+            logger.info("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_val_acc, best_epoch))
 
     return model, history
 
@@ -214,11 +205,9 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 300
-    data_dir = 'data/us_img_crop_enhance/'
-    train_data, train_data_size, valid_data, valid_data_size, model, optimizer, scheduler, loss_func = prepare_train(
-        data_dir)
-    trained_model, history = train_and_valid(
-        train_data, train_data_size, valid_data, valid_data_size, model, optimizer, scheduler, loss_func, num_epochs)
+    data_dir = 'data/us_label_crop/'
+    dataset, model, optimizer, scheduler, loss_func = prepare_train( data_dir)
+    trained_model, history = train_and_valid(dataset, model, optimizer, scheduler, loss_func, num_epochs)
     #
     # history = np.array(history)
     # plt.plot(history[:, 0:2])
