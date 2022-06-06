@@ -11,7 +11,7 @@ import logging
 import warnings
 warnings.filterwarnings("ignore")
 logger = logging.getLogger("ResNetTrain")
-logger.addHandler(logging.FileHandler("ResNetTrainLog.txt"))
+logger.addHandler(logging.FileHandler("data/ResNetTrainLog.txt"))
 
 
 class SkinDataset(Dataset):
