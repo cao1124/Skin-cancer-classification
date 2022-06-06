@@ -5,7 +5,7 @@ import torch
 from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset, Sampler, random_split
 from PIL import Image
-
+from resnet_train import skin_mean, skin_std
 from utils import AddGaussianNoise
 
 
@@ -87,7 +87,7 @@ class iNaturalistDataLoader(DataLoader):
             transforms.ColorJitter(),
             transforms.ToTensor(),
             transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
-            transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
+            transforms.Normalize(skin_mean, skin_std)
         ])
         test_trsfm = transforms.Compose([
             transforms.Resize([224, 224]),    # 256

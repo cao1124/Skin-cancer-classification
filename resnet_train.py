@@ -11,6 +11,7 @@ from utils.get_log import _get_logger
 import warnings
 warnings.filterwarnings("ignore")
 logger = _get_logger('data/saved/log/TrainLog.txt', 'info')
+skin_mean, skin_std = [0.283, 0.283, 0.288], [0.23, 0.23, 0.235]
 
 
 class SkinDataset(Dataset):
@@ -51,11 +52,11 @@ def prepare_train(data_dir):
             transforms.ColorJitter(),
             transforms.ToTensor(),
             transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
-            transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])]),
+            transforms.Normalize(skin_mean, skin_std)]),
         'valid': transforms.Compose([
             transforms.Resize([224, 224]),
             transforms.ToTensor(),
-            transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
+            transforms.Normalize(skin_mean, skin_std)
         ])
     }
 
@@ -63,8 +64,8 @@ def prepare_train(data_dir):
     dataset = SkinDataset(data_dir, data_dir + '/1342data.txt', image_transforms['train'])
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet50(pretrained=True)
-    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    model = models.densenet121(pretrained=True)
+    model.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
     #                                       ('dropout1', nn.Dropout(1)),
