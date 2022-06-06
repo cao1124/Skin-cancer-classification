@@ -113,11 +113,10 @@ def train_and_valid(dataset, model, optimizer, scheduler, loss_function, epochs=
     # random split dataset 五折交叉验证
     n_val = int(len(dataset) * 0.2)
     n_train = len(dataset) - n_val
-    for i in range(5):
+    seed_list = [5, 4, 3, 2, 1]
+    for i in seed_list:
         logger.info('第{}次实验:'.format(i))
-        train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val],
-                                                  generator=torch.manual_seed(i))
-
+        train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.manual_seed(i))
         train_data_size = len(train_dataset.indices)
         valid_data_size = len(val_dataset.indices)
 
@@ -225,3 +224,4 @@ if __name__ == '__main__':
     # plt.ylim(0, 1)
     # plt.savefig('ResNet' + '_accuracy_curve.png')
     # plt.show()
+
