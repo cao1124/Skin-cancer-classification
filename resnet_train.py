@@ -8,10 +8,11 @@ from torch.utils.data import DataLoader, random_split, Dataset
 from tqdm import tqdm
 from PIL import Image
 from utils.get_log import _get_logger
+from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
 logger = _get_logger('data/saved/log/ResNet-bs-test.txt', 'info')
-skin_mean, skin_std = [0.283, 0.283, 0.288], [0.23, 0.23, 0.235]
+skin_mean, skin_std = [0.334, 0.334, 0.323], [0.23, 0.231, 0.225]
 
 
 class SkinDataset(Dataset):
@@ -40,32 +41,12 @@ class SkinDataset(Dataset):
         return len(self.labels)
 
 
-def prepare_train(data_dir):
-    # 数据增强
-    image_transforms = {
-        'train': transforms.Compose([
-            transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
-            # Cutout(),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
-            transforms.RandomRotation(90),
-            transforms.ColorJitter(),
-            transforms.ToTensor(),
-            transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
-            transforms.Normalize(skin_mean, skin_std)]),
-        'valid': transforms.Compose([
-            transforms.Resize([224, 224]),
-            transforms.ToTensor(),
-            transforms.Normalize(skin_mean, skin_std)
-        ])
-    }
-
-    # DataLoader
-    dataset = SkinDataset(data_dir, data_dir + '/1342data.txt', image_transforms['train'])
-
+def prepare_model(data_dir):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet50(pretrained=True)
-    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    model = models.convnext_large(pretrained=True)
+    model.classifier = nn.Sequential(nn.LayerNorm((1536,), eps=1e-06, elementwise_affine=True),
+                                     nn.Flatten(start_dim=1, end_dim=-1),
+                                     nn.Linear(in_features=1536, out_features=22, bias=True))
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
     #                                       ('dropout1', nn.Dropout(1)),
@@ -108,27 +89,53 @@ def prepare_train(data_dir):
     # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80], gamma=0.1)
     scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.005, last_epoch=-1)
     # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5, last_epoch=-1)
-    return dataset, model, optimizer, scheduler, loss_func
+    return model, optimizer, scheduler, loss_func
 
 
 def train_and_valid(data_dir, epochs=25):
-    # seed_list = [5, 4, 3, 2, 1]
-    bs_list = [8, 16, 32, 64, 96]
-    for bs in bs_list:
-        # logger.info('第{}次实验:'.format(i))
-        logger.info('batch size = {}:'.format(bs))
-        dataset, model, optimizer, scheduler, loss_function = prepare_train(data_dir)
-        # random split dataset 五折交叉验证
-        n_val = int(len(dataset) * 0.2)
-        n_train = len(dataset) - n_val
-        train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.manual_seed(0))  #i
+    # 数据增强
+    image_transforms = {
+        'train': transforms.Compose([
+            transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
+            # Cutout(),
+            transforms.RandomHorizontalFlip(p=0.5),
+            transforms.RandomVerticalFlip(p=0.5),
+            transforms.RandomRotation(90),
+            transforms.ColorJitter(),
+            transforms.ToTensor(),
+            transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
+            transforms.Normalize(skin_mean, skin_std)]),
+        'valid': transforms.Compose([
+            transforms.Resize([224, 224]),
+            transforms.ToTensor(),
+            transforms.Normalize(skin_mean, skin_std)
+        ])
+    }
+
+    # DataLoader
+    dataset = SkinDataset(data_dir, data_dir + '/1342data.txt', image_transforms['train'])
+    # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
+    n_val = int(len(dataset) * 0.2)
+    n_train = len(dataset) - n_val
+    train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.manual_seed(0))  # i
+
+    # sklearn flod 五折交叉验证
+    skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
+    i = 0
+    bs = 8
+    for train_index, val_index in skf.split(dataset.img_path, dataset.labels):
+        logger.info('第{}次实验:'.format(i))
+        train_dataset.indices = list(train_index)
+        val_dataset.indices = list(val_index)
+
         train_data_size = len(train_dataset.indices)
         valid_data_size = len(val_dataset.indices)
 
+        logger.info('batch size = {}:'.format(bs))
+        model, optimizer, scheduler, loss_function = prepare_model(data_dir)
         train_data = DataLoader(train_dataset, batch_size=bs, shuffle=True, num_workers=8)
         valid_data = DataLoader(val_dataset, batch_size=bs, shuffle=False, num_workers=8)
         logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
-
         history = []
         best_val_acc = 0.0
         best_tran_acc = 0.0
@@ -198,7 +205,7 @@ def train_and_valid(data_dir, epochs=25):
                     epoch + 1, avg_valid_loss, avg_train_acc * 100, avg_valid_loss, avg_valid_acc * 100))
             logger.info("Best Accuracy for train : {:.4f}".format(best_tran_acc))
             logger.info("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_val_acc, best_epoch))
-
+        i += 1
     # return model, history
 
 
