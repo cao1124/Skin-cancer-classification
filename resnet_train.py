@@ -30,7 +30,10 @@ class SkinDataset(Dataset):
         label = self.labels[index]
 
         with open(path, 'rb') as f:
-            sample = Image.open(f).convert('RGB')
+            if os.path.exists(f):
+                sample = Image.open(f).convert('RGB')
+            else:
+                sample = Image.open(f.split('.jpg')[0] + '.tiff').convert('RGB')
 
         if self.transforms is not None:
             sample = self.transforms(sample)
