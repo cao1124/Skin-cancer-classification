@@ -106,14 +106,14 @@ def prepare_train(data_dir):
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80], gamma=0.1)
-    # scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.005, last_epoch=-1)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5, last_epoch=-1)
+    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.005, last_epoch=-1)
+    # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5, last_epoch=-1)
     return dataset, model, optimizer, scheduler, loss_func
 
 
 def train_and_valid(data_dir, epochs=25):
     # seed_list = [5, 4, 3, 2, 1]
-    bs_list = [2, 4, 8, 16, 32, 64, 96]
+    bs_list = [8, 16, 32, 64, 96]
     for bs in bs_list:
         # logger.info('第{}次实验:'.format(i))
         logger.info('batch size = {}:'.format(bs))
