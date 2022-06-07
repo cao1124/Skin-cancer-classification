@@ -15,8 +15,8 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "data/us_img_crop_process/",
-            "batch_size": 96,
+            "data_dir": "data/us_label_mask1/",
+            "batch_size": 8,
             "shuffle": true,
             "num_workers": 8
         }
@@ -37,23 +37,21 @@
         "args": {
             "reweight": true,
             "reweight_factor": 0.015,
-            "reweight_epoch": 240
+            "reweight_epoch": 80
         }
     },
     "metrics": [
         "accuracy"
     ],
     "lr_scheduler": {
-        "type": "CustomLR",
+        "type": "CosineAnnealingLR",
         "args": {
-            "step1": 120,
-            "step2": 240,
-            "gamma": 0.1,
-            "warmup_epoch": 5
+            "T_max": 50,
+            "eta_min": 0.0
         }
     },
     "trainer": {
-        "epochs": 300,
+        "epochs": 100,
 
         "save_dir": "saved/",
         "save_period": 100,

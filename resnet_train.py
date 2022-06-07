@@ -1,6 +1,4 @@
 import os
-from collections import OrderedDict
-
 import torch
 from torch.optim import lr_scheduler
 from torchvision import models, transforms
@@ -45,9 +43,8 @@ class SkinDataset(Dataset):
 
 def prepare_model(data_dir):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.vit_b_16(pretrained=True)
-    model.heads = nn.Sequential(OrderedDict([('head', nn.Linear(in_features=1024, out_features=22, bias=True))]))
-    # model.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
+    model = models.densenet121(pretrained=True)
+    model.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),

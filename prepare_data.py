@@ -22,37 +22,6 @@ def split_data():
     print('.')
 
 
-def split_five():
-    dataset = LT_Dataset('data/us_img_crop/', 'data/us_img_crop/data1326.txt')
-    data1, data2, data3, data4, data5 = random_split(dataset, lengths=[int(len(dataset.img_path) * 0.2) + 1,
-                                                                       int(len(dataset.img_path) * 0.2),
-                                                                       int(len(dataset.img_path) * 0.2),
-                                                                       int(len(dataset.img_path) * 0.2),
-                                                                       int(len(dataset.img_path) * 0.2)],
-                                                     generator=torch.Generator().manual_seed(0))
-    with open('data1.txt', 'w') as f1:
-        for i in list(data1.indices):
-            s = dataset.img_path[i] + ',' + str(dataset.labels[i]) + '\n'
-            f1.write(s)
-    with open('data2.txt', 'w') as f2:
-        for i in list(data2.indices):
-            s = dataset.img_path[i] + ',' + str(dataset.labels[i]) + '\n'
-            f2.write(s)
-    with open('data3.txt', 'w') as f3:
-        for i in list(data1.indices):
-            s = dataset.img_path[i] + ',' + str(dataset.labels[i]) + '\n'
-            f3.write(s)
-    with open('data4.txt', 'w') as f4:
-        for i in list(data1.indices):
-            s = dataset.img_path[i] + ',' + str(dataset.labels[i]) + '\n'
-            f4.write(s)
-    with open('data5.txt', 'w') as f5:
-        for i in list(data1.indices):
-            s = dataset.img_path[i] + ',' + str(dataset.labels[i]) + '\n'
-            f5.write(s)
-    print('done')
-
-
 class SkinDisease(Enum):
     OB = 0  # 其他良性 other benign
     BNT = 1  # 神经源性肿瘤 Benign Neurogenic tumors
