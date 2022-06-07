@@ -114,7 +114,7 @@ def train_and_valid(data_dir, epochs=25):
     bs_list = [2, 4, 8, 16, 32, 64, 96]
     for bs in bs_list:
         # logger.info('第{}次实验:'.format(i))
-        logger.info('batch size = :'.format(bs))
+        logger.info('batch size = {}:'.format(bs))
         dataset, model, optimizer, scheduler, loss_function = prepare_train(data_dir)
         # random split dataset 五折交叉验证
         n_val = int(len(dataset) * 0.2)
