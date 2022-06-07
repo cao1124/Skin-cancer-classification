@@ -215,7 +215,7 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 300
+    num_epochs = 100
     data_dir = 'data/us_label_crop/'
     train_and_valid(data_dir, num_epochs)
 
