@@ -11,7 +11,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('data/saved/log/ResNet50.txt', 'info')
+logger = _get_logger('data/saved/log/densenet121.txt', 'info')
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 
 
@@ -43,8 +43,8 @@ class SkinDataset(Dataset):
 
 def prepare_model(data_dir):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet50(pretrained=True)
-    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    model = models.densenet121(pretrained=True)
+    model.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
