@@ -90,7 +90,7 @@ def prepare_model(data_dir):
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80], gamma=0.1)
     scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.005)
-    # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5, last_epoch=-1)
+    # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5)
     return model, optimizer, scheduler, loss_func
 
 
@@ -215,7 +215,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    data_dir = 'data/us_label_crop/'
+    data_dir = 'data/us_label_mask/'
     train_and_valid(data_dir, num_epochs)
 
     # plt show
