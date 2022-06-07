@@ -64,8 +64,8 @@ def prepare_train(data_dir):
     dataset = SkinDataset(data_dir, data_dir + '/1342data.txt', image_transforms['train'])
 
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.densenet121(pretrained=True)
-    model.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
+    model = models.resnet50(pretrained=True)
+    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
     #                                       ('dropout1', nn.Dropout(1)),
@@ -99,7 +99,7 @@ def prepare_train(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=2e-4, momentum=0.9)     # , nesterov=True
+    optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=2e-4, momentum=0.9, nesterov=True)     #
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
     # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
@@ -110,19 +110,21 @@ def prepare_train(data_dir):
 
 
 def train_and_valid(data_dir, epochs=25):
-    seed_list = [5, 4, 3, 2, 1]
-    for i in seed_list:
-        logger.info('第{}次实验:'.format(i))
+    # seed_list = [5, 4, 3, 2, 1]
+    bs_list = [2, 4, 8, 16, 32, 64, 96]
+    for bs in bs_list:
+        # logger.info('第{}次实验:'.format(i))
+        logger.info('batch size = :'.format(bs))
         dataset, model, optimizer, scheduler, loss_function = prepare_train(data_dir)
         # random split dataset 五折交叉验证
         n_val = int(len(dataset) * 0.2)
         n_train = len(dataset) - n_val
-        train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.manual_seed(i))
+        train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.manual_seed(0))  #i
         train_data_size = len(train_dataset.indices)
         valid_data_size = len(val_dataset.indices)
 
-        train_data = DataLoader(train_dataset, batch_size=64, shuffle=True, num_workers=8)
-        valid_data = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=8)
+        train_data = DataLoader(train_dataset, batch_size=bs, shuffle=True, num_workers=8)
+        valid_data = DataLoader(val_dataset, batch_size=bs, shuffle=False, num_workers=8)
         logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
 
         history = []
@@ -199,7 +201,7 @@ def train_and_valid(data_dir, epochs=25):
 
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
