@@ -30,6 +30,8 @@ class SkinDataset(Dataset):
         label = self.labels[index]
         if not os.path.exists(path):
             path = path.split('.jpg')[0] + '.tiff'
+            if not os.path.exists(path):
+                path = path.split('.tiff')[0] + '.bmp'
 
         with open(path, 'rb') as f:
             sample = Image.open(f).convert('RGB')
