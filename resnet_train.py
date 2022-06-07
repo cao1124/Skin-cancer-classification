@@ -32,6 +32,8 @@ class SkinDataset(Dataset):
             path = path.split('.jpg')[0] + '.tiff'
             if not os.path.exists(path):
                 path = path.split('.tiff')[0] + '.bmp'
+                if not os.path.exists(path):
+                    path = path.split('.bmp')[0] + '.png'
 
         with open(path, 'rb') as f:
             sample = Image.open(f).convert('RGB')
