@@ -28,12 +28,11 @@ class SkinDataset(Dataset):
     def __getitem__(self, index):
         path = self.img_path[index]
         label = self.labels[index]
+        if not os.path.exists(path):
+            path = path.split('.jpg')[0] + '.tiff'
 
         with open(path, 'rb') as f:
-            if os.path.exists(f):
-                sample = Image.open(f).convert('RGB')
-            else:
-                sample = Image.open(f.split('.jpg')[0] + '.tiff').convert('RGB')
+            sample = Image.open(f).convert('RGB')
 
         if self.transforms is not None:
             sample = self.transforms(sample)
