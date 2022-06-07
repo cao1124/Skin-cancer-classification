@@ -44,9 +44,7 @@ class SkinDataset(Dataset):
 def prepare_model(data_dir):
     # 迁移学习  这里使用ResNet-50的预训练模型。
     model = models.convnext_large(pretrained=True)
-    model.classifier = nn.Sequential(nn.LayerNorm((1536,), eps=1e-06, elementwise_affine=True),
-                                     nn.Flatten(start_dim=1, end_dim=-1),
-                                     nn.Linear(in_features=1536, out_features=22, bias=True))
+    model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
     #                                       ('dropout1', nn.Dropout(1)),
