@@ -10,7 +10,7 @@ from PIL import Image
 from utils.get_log import _get_logger
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('data/saved/log/denseNet.txt', 'info')
+logger = _get_logger('data/saved/log/ResNet-bs-test.txt', 'info')
 skin_mean, skin_std = [0.283, 0.283, 0.288], [0.23, 0.23, 0.235]
 
 
