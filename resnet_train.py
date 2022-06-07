@@ -12,7 +12,7 @@ from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
 logger = _get_logger('data/saved/log/ResNet18.txt', 'info')
-skin_mean, skin_std = [0.334, 0.334, 0.323], [0.23, 0.231, 0.225]
+skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 
 
 class SkinDataset(Dataset):
@@ -79,12 +79,9 @@ def prepare_model(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    # adam  Nadam     Radam  ,
-    # optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
-    # optimizer = optim.NAdam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
-    # optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)     #
-    # optimizer = optim.RAdam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
-    optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
+    optimizer = optim.SGD(model.parameters(), lr=0.1, weight_decay=2e-4, momentum=0.9, nesterov=True)
+    # optimizer = optim.RMSprop(model.parameters(), lr=0.1, alpha=0.99, eps=1e-08, weight_decay=2e-4, momentum=0.9, centered=False)
+    # optimizer = optim.Adam(model.parameters(), lr=0.1, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
 
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
@@ -92,7 +89,7 @@ def prepare_model(data_dir):
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80], gamma=0.1)
-    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.005, last_epoch=-1)
+    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.005)
     # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5, last_epoch=-1)
     return model, optimizer, scheduler, loss_func
 
