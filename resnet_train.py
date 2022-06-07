@@ -11,7 +11,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('data/saved/log/ResNet-bs-test.txt', 'info')
+logger = _get_logger('data/saved/log/ResNet18.txt', 'info')
 skin_mean, skin_std = [0.334, 0.334, 0.323], [0.23, 0.231, 0.225]
 
 
@@ -43,8 +43,9 @@ class SkinDataset(Dataset):
 
 def prepare_model(data_dir):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.convnext_large(pretrained=True)
-    model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)
+    model = models.resnet18(pretrained=True)
+    model.fc = nn.Linear(in_features=512, out_features=22, bias=True)
+    # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
     #                                       ('dropout1', nn.Dropout(1)),
@@ -116,94 +117,93 @@ def train_and_valid(data_dir, epochs=25):
     n_val = int(len(dataset) * 0.2)
     n_train = len(dataset) - n_val
     train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.manual_seed(0))  # i
-
-    # sklearn flod 五折交叉验证
-    skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
-    i = 0
     bs = 8
-    for train_index, val_index in skf.split(dataset.img_path, dataset.labels):
-        logger.info('第{}次实验:'.format(i))
-        train_dataset.indices = list(train_index)
-        val_dataset.indices = list(val_index)
+    # sklearn flod 五折交叉验证
+    # skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
+    # i = 0
+    # for train_index, val_index in skf.split(dataset.img_path, dataset.labels):
+    #     logger.info('第{}次实验:'.format(i))
+    # train_dataset.indices = list(train_index)
+    # val_dataset.indices = list(val_index)
 
-        train_data_size = len(train_dataset.indices)
-        valid_data_size = len(val_dataset.indices)
+    train_data_size = len(train_dataset.indices)
+    valid_data_size = len(val_dataset.indices)
 
-        logger.info('batch size = {}:'.format(bs))
-        model, optimizer, scheduler, loss_function = prepare_model(data_dir)
-        train_data = DataLoader(train_dataset, batch_size=bs, shuffle=True, num_workers=8)
-        valid_data = DataLoader(val_dataset, batch_size=bs, shuffle=False, num_workers=8)
-        logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
-        history = []
-        best_val_acc = 0.0
-        best_tran_acc = 0.0
-        best_epoch = 0
+    logger.info('batch size = {}:'.format(bs))
+    model, optimizer, scheduler, loss_function = prepare_model(data_dir)
+    train_data = DataLoader(train_dataset, batch_size=bs, shuffle=True, num_workers=8)
+    valid_data = DataLoader(val_dataset, batch_size=bs, shuffle=False, num_workers=8)
+    logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
+    history = []
+    best_val_acc = 0.0
+    best_tran_acc = 0.0
+    best_epoch = 0
 
-        for epoch in range(epochs):
-            logger.info("Epoch: {}/{}".format(epoch + 1, epochs))
+    for epoch in range(epochs):
+        logger.info("Epoch: {}/{}".format(epoch + 1, epochs))
 
-            model.train()
+        model.train()
 
-            train_loss = 0.0
-            train_acc = 0.0
-            valid_loss = 0.0
-            valid_acc = 0.0
-            alpha = 0.5
+        train_loss = 0.0
+        train_acc = 0.0
+        valid_loss = 0.0
+        valid_acc = 0.0
+        alpha = 0.5
 
-            # for i, data in enumerate(train_data):
-            for step, data in enumerate(tqdm(train_data)):
-                inputs = data[0].to(device)
-                labels = data[1].to(device)
+        # for i, data in enumerate(train_data):
+        for step, data in enumerate(tqdm(train_data)):
+            inputs = data[0].to(device)
+            labels = data[1].to(device)
 
-                # inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)        # mixup
+            # inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)        # mixup
+            outputs = model(inputs)
+            # outputs = outputs.logits                                                   # inception-v3 TypeError
+            # loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)    # mixup
+            loss = loss_function(outputs, labels)
+            train_loss += loss.item()
+            pred = torch.max(outputs, 1)[1]
+            train_correct = (pred == labels).sum()
+            train_acc += train_correct.item()
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
+
+        with torch.no_grad():
+            model.eval()
+
+            for j, (inputs, labels) in enumerate(tqdm(valid_data)):
+                inputs = inputs.to(device)
+                labels = labels.to(device)
                 outputs = model(inputs)
-                # outputs = outputs.logits                                                   # inception-v3 TypeError
-                # loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)    # mixup
                 loss = loss_function(outputs, labels)
-                train_loss += loss.item()
+                valid_loss += loss.item()
                 pred = torch.max(outputs, 1)[1]
-                train_correct = (pred == labels).sum()
-                train_acc += train_correct.item()
-                optimizer.zero_grad()
-                loss.backward()
-                optimizer.step()
-                scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
+                num_correct = (pred == labels).sum()
+                valid_acc += num_correct.item()
 
-            with torch.no_grad():
-                model.eval()
+        avg_train_loss = train_loss / train_data_size
+        avg_train_acc = train_acc / train_data_size
 
-                for j, (inputs, labels) in enumerate(tqdm(valid_data)):
-                    inputs = inputs.to(device)
-                    labels = labels.to(device)
-                    outputs = model(inputs)
-                    loss = loss_function(outputs, labels)
-                    valid_loss += loss.item()
-                    pred = torch.max(outputs, 1)[1]
-                    num_correct = (pred == labels).sum()
-                    valid_acc += num_correct.item()
+        avg_valid_loss = valid_loss / valid_data_size
+        avg_valid_acc = valid_acc / valid_data_size
 
-            avg_train_loss = train_loss / train_data_size
-            avg_train_acc = train_acc / train_data_size
+        history.append([avg_train_loss, avg_valid_loss,
+                        avg_train_acc, avg_valid_acc])
 
-            avg_valid_loss = valid_loss / valid_data_size
-            avg_valid_acc = valid_acc / valid_data_size
+        if best_tran_acc < avg_train_acc:
+            best_tran_acc = avg_train_acc
 
-            history.append([avg_train_loss, avg_valid_loss,
-                            avg_train_acc, avg_valid_acc])
+        if best_val_acc < avg_valid_acc:
+            best_val_acc = avg_valid_acc
+            best_epoch = epoch + 1
+            torch.save(model, 'data/saved/checkpoint/train_best_model' + str(best_epoch) + '.pt')
 
-            if best_tran_acc < avg_train_acc:
-                best_tran_acc = avg_train_acc
-
-            if best_val_acc < avg_valid_acc:
-                best_val_acc = avg_valid_acc
-                best_epoch = epoch + 1
-                torch.save(model, 'data/saved/checkpoint/train_best_model' + str(best_epoch) + '.pt')
-
-            logger.info("Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%".format(
-                    epoch + 1, avg_valid_loss, avg_train_acc * 100, avg_valid_loss, avg_valid_acc * 100))
-            logger.info("Best Accuracy for train : {:.4f}".format(best_tran_acc))
-            logger.info("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_val_acc, best_epoch))
-        i += 1
+        logger.info("Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%".format(
+                epoch + 1, avg_valid_loss, avg_train_acc * 100, avg_valid_loss, avg_valid_acc * 100))
+        logger.info("Best Accuracy for train : {:.4f}".format(best_tran_acc))
+        logger.info("Best Accuracy for validation : {:.4f} at epoch {:03d}".format(best_val_acc, best_epoch))
+        # i += 1
     # return model, history
 
 
