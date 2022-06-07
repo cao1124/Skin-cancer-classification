@@ -105,7 +105,9 @@ def prepare_train(data_dir):
     # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
-    scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[120, 240], gamma=0.1)
+    # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80], gamma=0.1)
+    # scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.005, last_epoch=-1)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5, last_epoch=-1)
     return dataset, model, optimizer, scheduler, loss_func
 
 
@@ -160,7 +162,7 @@ def train_and_valid(data_dir, epochs=25):
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                # scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
+                scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
 
             with torch.no_grad():
                 model.eval()
