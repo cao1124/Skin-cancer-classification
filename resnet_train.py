@@ -79,7 +79,11 @@ def prepare_model(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=2e-4, momentum=0.9, nesterov=True)     #
+    # adam  Nadam     Radam  ,
+    # optimizer = optim.Adam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
+    # optimizer = optim.NAdam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
+    # optimizer = optim.RAdam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)     #
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
     # scheduler = lr_scheduler.LambdaLR(optimizer, lr_lambda=lambda1)
@@ -211,7 +215,7 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 100
+    num_epochs = 300
     data_dir = 'data/us_label_crop/'
     train_and_valid(data_dir, num_epochs)
 
