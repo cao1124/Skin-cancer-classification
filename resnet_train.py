@@ -28,12 +28,6 @@ class SkinDataset(Dataset):
     def __getitem__(self, index):
         path = self.img_path[index]
         label = self.labels[index]
-        if not os.path.exists(path):
-            path = path.split('.jpg')[0] + '.tiff'
-            if not os.path.exists(path):
-                path = path.split('.tiff')[0] + '.bmp'
-                if not os.path.exists(path):
-                    path = path.split('.bmp')[0] + '.png'
 
         with open(path, 'rb') as f:
             sample = Image.open(f).convert('RGB')
@@ -221,7 +215,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    data_dir = 'data/us_label_mask/'
+    data_dir = 'data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
     # plt show
