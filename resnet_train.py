@@ -11,7 +11,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('data/saved/log/densenet121.txt', 'info')
+logger = _get_logger('data/saved/log/lr_test.txt', 'info')
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 
 
