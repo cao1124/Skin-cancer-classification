@@ -79,7 +79,7 @@ def prepare_model(epochs):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)
+    optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=2e-4, momentum=0.9, nesterov=True)
     # optimizer = optim.RMSprop(model.parameters(), lr=0.1, alpha=0.99, eps=1e-08, weight_decay=2e-4, momentum=0.9, centered=False)
     # optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
 
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 300
+    num_epochs = 100
     data_dir = 'data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
