@@ -43,8 +43,8 @@ class SkinDataset(Dataset):
 
 def prepare_model(data_dir):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.densenet121(pretrained=True)
-    model.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
+    model = models.resnet18(pretrained=True)
+    model.fc = nn.Linear(in_features=512, out_features=22, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
@@ -79,8 +79,8 @@ def prepare_model(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)
-    # optimizer = optim.RMSprop(model.parameters(), lr=0.1, alpha=0.99, eps=1e-08, weight_decay=2e-4, momentum=0.9, centered=False)
+    # optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)
+    optimizer = optim.RMSprop(model.parameters(), lr=0.1, alpha=0.99, eps=1e-08, weight_decay=2e-4, momentum=0.9, centered=False)
     # optimizer = optim.Adam(model.parameters(), lr=0.1, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
 
     # 定义学习率与轮数关系的函数
