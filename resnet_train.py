@@ -41,10 +41,10 @@ class SkinDataset(Dataset):
         return len(self.labels)
 
 
-def prepare_model(data_dir):
+def prepare_model(epochs):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet50(pretrained=True)
-    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    model = models.resnet18(pretrained=True)
+    model.fc = nn.Linear(in_features=512, out_features=22, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
@@ -79,9 +79,9 @@ def prepare_model(data_dir):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    # optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)
+    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)
     # optimizer = optim.RMSprop(model.parameters(), lr=0.1, alpha=0.99, eps=1e-08, weight_decay=2e-4, momentum=0.9, centered=False)
-    optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
+    # optimizer = optim.Adam(model.parameters(), lr=0.01, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
 
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
@@ -89,7 +89,7 @@ def prepare_model(data_dir):
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80], gamma=0.1)
-    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=50, eta_min=0.005)
+    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs/2, eta_min=0.005)
     # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5)
     return model, optimizer, scheduler, loss_func
 
@@ -133,7 +133,7 @@ def train_and_valid(data_dir, epochs=25):
     valid_data_size = len(val_dataset.indices)
 
     logger.info('batch size = {}:'.format(bs))
-    model, optimizer, scheduler, loss_function = prepare_model(data_dir)
+    model, optimizer, scheduler, loss_function = prepare_model(epochs)
     train_data = DataLoader(train_dataset, batch_size=bs, shuffle=True, num_workers=8)
     valid_data = DataLoader(val_dataset, batch_size=bs, shuffle=False, num_workers=8)
     logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 100
+    num_epochs = 300
     data_dir = 'data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
