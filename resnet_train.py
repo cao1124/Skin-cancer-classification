@@ -214,7 +214,7 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 100
+    num_epochs = 300
     data_dir = 'data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
