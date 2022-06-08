@@ -89,8 +89,8 @@ def prepare_model(epochs):
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80], gamma=0.1)
-    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs/2, eta_min=0.005)
-    # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5)
+    # scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs/2, eta_min=0.005)
+    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5)
     return model, optimizer, scheduler, loss_func
 
 
@@ -214,7 +214,7 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 300
+    num_epochs = 100
     data_dir = 'data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
