@@ -43,8 +43,8 @@ class SkinDataset(Dataset):
 
 def prepare_model(epochs):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet18(pretrained=True)
-    model.fc = nn.Linear(in_features=512, out_features=22, bias=True)
+    model = models.densenet121(pretrained=True)
+    model.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
@@ -79,8 +79,8 @@ def prepare_model(epochs):
 
     # 定义损失函数和优化器。
     loss_func = nn.CrossEntropyLoss()
-    optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)
-    # optimizer = optim.NAdam(model.parameters(), lr=0.01, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
+    # optimizer = optim.SGD(model.parameters(), lr=0.001, weight_decay=2e-4, momentum=0.9, nesterov=True)
+    optimizer = optim.NAdam(model.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=2e-4)
 
     # 定义学习率与轮数关系的函数
     # lambda1 = lambda epoch: 0.95 ** epoch  # 学习率 = 0.95**(轮数)
@@ -88,8 +88,8 @@ def prepare_model(epochs):
     # scheduler = lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.8)
     # 在指定的epoch值，如[10,30,50,70,90]处对学习率进行衰减，lr = lr * gamma
     # scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 80], gamma=0.1)
-    # scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs/2, eta_min=0.005)
-    scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5)
+    scheduler = lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs/2, eta_min=0.005)
+    # scheduler = lr_scheduler.ExponentialLR(optimizer, gamma=0.5)
     return model, optimizer, scheduler, loss_func
 
 
