@@ -9,7 +9,7 @@
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
-            "num_experts": 6
+            "num_experts": 9
         }
     },
     "data_loader": {
@@ -25,7 +25,7 @@
     "optimizer": {
         "type": "SGD",
         "args":{
-            "lr": 0.001,
+            "lr": 0.1,
             "weight_decay": 2e-4,
             "momentum": 0.9,
             "nesterov": true
