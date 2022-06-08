@@ -16,7 +16,7 @@
         "type": "iNaturalistDataLoader",
         "args":{
             "data_dir": "data/us_label_mask1/",
-            "batch_size": 16,
+            "batch_size": 4,
             "shuffle": true,
             "num_workers": 8
         }
