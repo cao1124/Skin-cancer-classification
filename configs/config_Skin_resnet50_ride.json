@@ -9,7 +9,7 @@
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
-            "num_experts": 9
+            "num_experts": 6
         }
     },
     "data_loader": {
