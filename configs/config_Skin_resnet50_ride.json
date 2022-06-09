@@ -16,7 +16,7 @@
         "type": "iNaturalistDataLoader",
         "args":{
             "data_dir": "data/us_label_mask1/",
-            "batch_size": 64,
+            "batch_size": 16,
             "shuffle": true,
             "num_workers": 8
         }
@@ -25,7 +25,7 @@
     "optimizer": {
         "type": "SGD",
         "args":{
-            "lr": 0.1,
+            "lr": 0.01,
             "weight_decay": 2e-4,
             "momentum": 0.9,
             "nesterov": true
@@ -51,7 +51,7 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 200,
 
         "save_dir": "saved/",
         "save_period": 100,
