@@ -43,8 +43,8 @@ class SkinDataset(Dataset):
 
 def prepare_model(epochs):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet18(pretrained=True)
-    model.fc = nn.Linear(in_features=512, out_features=22, bias=True)
+    model = models.resnet50(pretrained=True)
+    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
@@ -114,7 +114,7 @@ def train_and_valid(data_dir, epochs=25):
     }
 
     # DataLoader
-    dataset = SkinDataset(data_dir, data_dir + '/1342data.txt', image_transforms['train'])
+    dataset = SkinDataset(data_dir, data_dir + '/839.txt', image_transforms['train'])
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     n_val = int(len(dataset) * 0.2)
     n_train = len(dataset) - n_val
@@ -210,11 +210,11 @@ def train_and_valid(data_dir, epochs=25):
 
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    data_dir = 'data/us_label_mask1/'
+    data_dir = 'D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/'
     train_and_valid(data_dir, num_epochs)
 
     # plt show
