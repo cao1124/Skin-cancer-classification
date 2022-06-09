@@ -37,7 +37,7 @@
         "args": {
             "reweight": true,
             "reweight_factor": 0.015,
-            "reweight_epoch": 320
+            "reweight_epoch": 80
         }
     },
     "metrics": [
@@ -46,12 +46,12 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 200,
+            "T_max": 100,
             "eta_min": 0.0
         }
     },
     "trainer": {
-        "epochs": 400,
+        "epochs": 200,
 
         "save_dir": "saved/",
         "save_period": 100,
