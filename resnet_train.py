@@ -215,7 +215,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    data_dir = 'D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/'
+    data_dir = 'data/photo_img_merge/'
     train_and_valid(data_dir, num_epochs)
 
     # plt show
