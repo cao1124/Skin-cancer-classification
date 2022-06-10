@@ -136,10 +136,11 @@ def predict_single_image(image_path, checkpoint_path):
     # img = cv_imread(image_path)
 
     # load model weights
-    net = models.densenet121()
-    # net.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
-    net.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
-    net.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage).module.state_dict())
+    net = torch.load(checkpoint_path)
+    # net = models.densenet121()
+    # # net.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    # net.classifier = nn.Linear(in_features=1024, out_features=22, bias=True)
+    # net.load_state_dict(torch.load(checkpoint_path, map_location=lambda storage, loc: storage).module.state_dict())
 
     # grad_cam = GradCAM(image_path, net, 'layer4', (224, 224), 22, skin_mean, skin_std)
     # grad_cam.forward(img, show=True, write=False)
@@ -210,13 +211,13 @@ def predict_images(image_dir, checkpoint):
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    checkpoint_path = 'data/saved/checkpoint/resnet50_train_best_model.pt'
-    predict_images('D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/', checkpoint_path)
+    checkpoint_path = 'data/saved/checkpoint/train_best_model-0.pt'
+    # predict_images('D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/', checkpoint_path)
 
     # image_path = 'data/us_label_crop/D20191250 SCC.jpg'
     # predict_single_image(image_path, checkpoint_path)
 
-    # img_dir = 'data/us_label_crop/'
-    # images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]
-    # for image_path in images:
-    #     predict(image_path, checkpoint_path)
+    img_dir = 'data/us_label_crop/'
+    images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]
+    for image_path in images:
+        predict_single_image(image_path, checkpoint_path)

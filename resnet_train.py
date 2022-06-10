@@ -172,6 +172,7 @@ def train_and_valid(data_dir, epochs=25):
                 optimizer.step()
                 scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
 
+            confusion_matrix = torch.zeros(22, 22).cuda()
             with torch.no_grad():
                 model.eval()
 
@@ -185,6 +186,9 @@ def train_and_valid(data_dir, epochs=25):
                     num_correct = (pred == labels).sum()
                     valid_acc += num_correct.item()
 
+                    for t, p in zip(labels.view(-1), outputs.argmax(dim=1).view(-1)):
+                        confusion_matrix[t.long(), p.long()] += 1
+            acc_per_class = confusion_matrix.diag() / confusion_matrix.sum(1)
             avg_train_loss = train_loss / train_data_size
             avg_train_acc = train_acc / train_data_size
 
@@ -200,7 +204,8 @@ def train_and_valid(data_dir, epochs=25):
             if best_val_acc < avg_valid_acc:
                 best_val_acc = avg_valid_acc
                 best_epoch = epoch + 1
-                torch.save(model, 'data/saved/checkpoint/train_best_model-' + str(i) + '-' + str(best_epoch) + '.pt')
+                torch.save(model, 'data/saved/checkpoint/train_best_model-' + str(i) + '.pt') # + '-' + str(best_epoch)
+                logger.info("Best acc per class:：{}".format(acc_per_class))
 
             logger.info("Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%".format(
                     epoch + 1, avg_valid_loss, avg_train_acc * 100, avg_valid_loss, avg_valid_acc * 100))
@@ -214,7 +219,7 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 100
+    num_epochs = 200
     data_dir = 'data/photo_img_merge/'
     train_and_valid(data_dir, num_epochs)
 
