@@ -93,19 +93,19 @@ class iNaturalistDataLoader(DataLoader):
             transforms.Resize([224, 224]),    # 256
             # transforms.CenterCrop(224),
             transforms.ToTensor(),
-            transforms.Normalize([0.283, 0.283, 0.288], [0.23, 0.23, 0.235])
+            transforms.Normalize(skin_mean, skin_std)
             # transforms.Normalize([0.466, 0.471, 0.380], [0.195, 0.194, 0.192])
         ])
 
         if training:
             # dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_train.txt', train_trsfm)
             # val_dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_val.txt', test_trsfm)
-            dataset = LT_Dataset(data_dir, data_dir + '/1342data.txt', train_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/839.txt', train_trsfm)
             n_val = int(len(dataset) * 0.2)
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))
         else:   # test
-            dataset = LT_Dataset(data_dir, data_dir + '/1342data.txt', test_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/839.txt', test_trsfm)
             n_val = int(len(dataset) * 0.2)
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))

@@ -15,7 +15,7 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "data/us_label_mask1/",
+            "data_dir": "data/photo_img_merge/",
             "batch_size": 16,
             "shuffle": true,
             "num_workers": 8
@@ -46,12 +46,12 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 100,
+            "T_max": 50,
             "eta_min": 0.0
         }
     },
     "trainer": {
-        "epochs": 200,
+        "epochs": 100,
 
         "save_dir": "saved/",
         "save_period": 100,
