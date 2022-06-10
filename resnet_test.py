@@ -4,11 +4,13 @@ import torch
 import torchvision
 from cv2 import cv2
 from matplotlib import pyplot as plt
+from sklearn.model_selection import StratifiedKFold
+from torch.utils.data import DataLoader, random_split
 from torchvision import models, transforms
 import torch.nn as nn
 from PIL import Image
 from prepare_data import SkinDisease, is_image_file, cv_imread, cv_write
-from resnet_train import skin_mean, skin_std
+from resnet_train import skin_mean, skin_std, SkinDataset
 import warnings
 warnings.filterwarnings("ignore")
 
@@ -130,8 +132,8 @@ class GradCAM:
             plt.show()
 
 
-def predict(image_path, checkpoint_path):
-    img = cv_imread(image_path)
+def predict_single_image(image_path, checkpoint_path):
+    # img = cv_imread(image_path)
 
     # load model weights
     net = models.densenet121()
@@ -161,13 +163,58 @@ def predict(image_path, checkpoint_path):
         print('image:{}, predict_cla:{}, prob:{}'.format(image_path, SkinDisease(int(predict_cla)), predict[predict_cla].numpy()))
 
 
+def predict_images(image_dir, checkpoint):
+    # load model weights
+    net = torch.load(checkpoint_path)
+
+    loss_func = nn.CrossEntropyLoss()
+    # 数据增强
+    image_transforms = transforms.Compose([transforms.Resize([224, 224]), transforms.ToTensor(),
+                                           transforms.Normalize(skin_mean, skin_std)])
+
+    # dataloader
+    dataset = SkinDataset(image_dir, image_dir + '/839.txt', image_transforms)
+    n_val = int(len(dataset) * 0.2)
+    n_train = len(dataset) - n_val
+    train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.manual_seed(0))  # i
+    # sklearn flod 五折交叉验证
+    skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
+    for train_index, val_index in skf.split(dataset.img_path, dataset.labels):
+        val_dataset.indices = list(val_index)
+
+        bs = 8
+        num_classes = 22
+        valid_data = DataLoader(val_dataset, batch_size=bs, shuffle=False, num_workers=0)
+        test_loss = 0.0
+        test_acc = 0.0
+        confusion_matrix = torch.zeros(num_classes, num_classes).cuda()
+        with torch.no_grad():  # 用于通知dropout层和batchnorm层在train和val模式间切换。
+            net.eval()
+            for j, (inputs, labels) in enumerate(valid_data):
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+                outputs = net(inputs)
+                loss = loss_func(outputs, labels)
+                test_loss += loss.item()
+                pred = torch.max(outputs, 1)[1]
+                num_correct = (pred == labels).sum()
+                test_acc += num_correct.item()
+
+                for t, p in zip(labels.view(-1), outputs.argmax(dim=1).view(-1)):
+                    confusion_matrix[t.long(), p.long()] += 1
+
+        acc_per_class = confusion_matrix.diag() / confusion_matrix.sum(1)
+        print(acc_per_class)
+
+
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    checkpoint_path = 'data/saved/checkpoint/resnet50_train_best_model.pt'
+    predict_images('D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/', checkpoint_path)
 
-    image_path = 'data/us_label_crop/D20191250 SCC.jpg'
-    checkpoint_path = 'data/saved/checkpoint/train_best_model.pt'
-    predict(image_path, checkpoint_path)
+    # image_path = 'data/us_label_crop/D20191250 SCC.jpg'
+    # predict_single_image(image_path, checkpoint_path)
 
     # img_dir = 'data/us_label_crop/'
     # images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]

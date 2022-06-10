@@ -200,7 +200,7 @@ def train_and_valid(data_dir, epochs=25):
             if best_val_acc < avg_valid_acc:
                 best_val_acc = avg_valid_acc
                 best_epoch = epoch + 1
-                torch.save(model, 'data/saved/checkpoint/train_best_model' + str(best_epoch) + '.pt')
+                torch.save(model, 'data/saved/checkpoint/train_best_model-' + str(i) + '-' + str(best_epoch) + '.pt')
 
             logger.info("Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%".format(
                     epoch + 1, avg_valid_loss, avg_train_acc * 100, avg_valid_loss, avg_valid_acc * 100))
