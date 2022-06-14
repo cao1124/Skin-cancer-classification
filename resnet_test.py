@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import tablib
 import torch
 import torchvision
 from cv2 import cv2
@@ -132,7 +133,7 @@ class GradCAM:
             plt.show()
 
 
-def predict_single_image(image_path, checkpoint_path):
+def predict_single_image(txt_list, i, image_path, checkpoint_path):
     # img = cv_imread(image_path)
 
     # load model weights
@@ -161,7 +162,16 @@ def predict_single_image(image_path, checkpoint_path):
         output = torch.squeeze(net(img.to(device))).cpu()
         predict = torch.softmax(output, dim=0)
         predict_cla = torch.argmax(predict).numpy()
-        print('image:{}, predict_cla:{}, prob:{}'.format(image_path, SkinDisease(int(predict_cla)), predict[predict_cla].numpy()))
+        # print('image:{}, predict_cla:{}, prob:{}'.format(image_path, SkinDisease(int(predict_cla)),
+        #                                                  predict[predict_cla].numpy()))
+        label = []
+        if image_path.split('us_label_mask1/')[1] == txt_list[i].split(',')[0]:
+            label = [txt_list[i].split(',')[1], txt_list[i].split(',')[2]]
+            i += 1
+        else:
+            print("error in i:{} image path:{} and txt list:{}".format(i, image_path, txt_list[i]))
+    # SkinDisease(int(predict_cla))
+    return i, [image_path, label, [int(predict_cla), SkinDisease(int(predict_cla)).name], predict[predict_cla].numpy()]
 
 
 def predict_images(image_dir, checkpoint):
@@ -211,13 +221,23 @@ def predict_images(image_dir, checkpoint):
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    checkpoint_path = 'data/saved/checkpoint/train_best_model-0.pt'
+    checkpoint_path = 'data/saved/checkpoint/resnet50_train_best_model-3.pt'
     # predict_images('D:/MAD_File/上海_皮肤病/上海_皮肤病/photo_img_merge/', checkpoint_path)
 
     # image_path = 'data/us_label_crop/D20191250 SCC.jpg'
     # predict_single_image(image_path, checkpoint_path)
 
-    img_dir = 'data/us_label_crop/'
+    img_dir = 'data/us_label_mask1/'
     images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]
+    dataset = tablib.Dataset()
+    dataset.headers = ["image", "label_class", "predict_class", "prob"]
+    with open('data/us_label_mask1/1342data.txt') as file:
+        content = file.read()
+        txt_list = content.split('\n')
+    i = 0
     for image_path in images:
-        predict_single_image(image_path, checkpoint_path)
+        i, result = predict_single_image(txt_list, i, image_path, checkpoint_path)
+        dataset.append(result)
+
+    with open('predict.xlsx', mode='wb') as f:
+        f.write(dataset.xlsx)

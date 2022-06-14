@@ -9,13 +9,13 @@
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
-            "num_experts": 6
+            "num_experts": 9
         }
     },
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "data/photo_img_merge/",
+            "data_dir": "data/us_label_mask1/",
             "batch_size": 16,
             "shuffle": true,
             "num_workers": 8

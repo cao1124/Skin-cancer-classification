@@ -23,28 +23,28 @@ def split_data():
 
 
 class SkinDisease(Enum):
-    OB = 0  # 其他良性 other benign
-    BNT = 1  # 神经源性肿瘤 Benign Neurogenic tumors
-    BFT = 2  # 良性毛囊肿瘤 Benign follicular tumor
-    BSeb = 3  # 良性皮脂腺肿瘤   Benign sebaceous gland tumor
-    BKLL = 4  # 良性角化病样病变 Benign keratosis like lesions
-    BFMY = 5  # 良性纤维母细胞和肌纤维母细胞肿瘤  Benign fibroblastic and myofibroblastic tumors
-    BSwe = 6  # 良性汗腺肿瘤  Benign sweat gland tumor
-    Hema = 7  # 血管瘤 Hemangioma
-    Cyst = 8  # 囊肿 cyst
-    Infl = 9  # 炎症 inflammation
-    Wart = 10  # 疣  wart
-    Lipo = 11  # 脂肪瘤 lipoma
-    Nevu = 12  # 痣 nevus
+    其他良性 = 0  # 其他良性 other benign
+    神经源性肿瘤 = 1  # 神经源性肿瘤 Benign Neurogenic tumors
+    良性毛囊肿瘤 = 2  # 良性毛囊肿瘤 Benign follicular tumor
+    良性皮脂腺肿瘤 = 3  # 良性皮脂腺肿瘤   Benign sebaceous gland tumor
+    良性角化病样病变 = 4  # 良性角化病样病变 Benign keratosis like lesions
+    良性纤维母细胞和肌纤维母细胞肿瘤 = 5  # 良性纤维母细胞和肌纤维母细胞肿瘤  Benign fibroblastic and myofibroblastic tumors
+    良性汗腺肿瘤 = 6  # 良性汗腺肿瘤  Benign sweat gland tumor
+    血管瘤 = 7  # 血管瘤 Hemangioma
+    囊肿 = 8  # 囊肿 cyst
+    炎症 = 9  # 炎症 inflammation
+    疣 = 10  # 疣  wart
+    脂肪瘤 = 11  # 脂肪瘤 lipoma
+    痣 = 12  # 痣 nevus
 
-    OM = 13  # 其他恶性 Other malignancies
+    其他恶性 = 13  # 其他恶性 Other malignancies
     BD = 14
     AK = 15
     MM = 16
     SCC = 17
     BCC = 18
-    Aden = 19  # 腺癌 Adenocarcinoma
-    DSFP = 20  # 隆突性皮肤纤维肉瘤  Dermatofibrosarcoma protuberans
+    腺癌 = 19  # 腺癌 Adenocarcinoma
+    隆突性皮肤纤维肉瘤 = 20  # 隆突性皮肤纤维肉瘤  Dermatofibrosarcoma protuberans
     Paget = 21
 
 

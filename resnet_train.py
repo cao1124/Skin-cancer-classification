@@ -1,4 +1,7 @@
 import os
+
+import numpy as np
+import pandas as pd
 import torch
 from torch.optim import lr_scheduler
 from torchvision import models, transforms
@@ -115,7 +118,7 @@ def train_and_valid(data_dir, epochs=25):
     }
 
     # DataLoader
-    dataset = SkinDataset(data_dir, data_dir + '/839.txt', image_transforms['train'])
+    dataset = SkinDataset(data_dir, data_dir + '1342data.txt', image_transforms['train'])
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     n_val = int(len(dataset) * 0.2)
     n_train = len(dataset) - n_val
@@ -153,7 +156,6 @@ def train_and_valid(data_dir, epochs=25):
             valid_acc = 0.0
             alpha = 0.5
 
-            # for i, data in enumerate(train_data):
             for step, data in enumerate(tqdm(train_data)):
                 inputs = data[0].to(device)
                 labels = data[1].to(device)
@@ -220,7 +222,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 200
-    data_dir = 'data/photo_img_merge/'
+    data_dir = 'data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
     # plt show
