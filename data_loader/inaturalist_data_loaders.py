@@ -113,10 +113,15 @@ class iNaturalistDataLoader(DataLoader):
                 break
 
         else:   # test
-            dataset = LT_Dataset(data_dir, data_dir + '/839.txt', test_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/1342data.txt', test_trsfm)
             n_val = int(len(dataset) * 0.2)
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))
+            skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
+            for train_index, val_index in skf.split(dataset.img_path, dataset.labels):
+                train_dataset.indices = list(train_index)
+                val_dataset.indices = list(val_index)
+                break
             train_dataset = val_dataset
 
         self.dataset = train_dataset
