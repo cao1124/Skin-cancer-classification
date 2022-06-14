@@ -1,6 +1,7 @@
 import argparse
 import os
 
+import tablib
 import torch
 from PIL import Image
 from tqdm import tqdm
@@ -11,6 +12,7 @@ import model.model as module_arch
 import numpy as np
 from torchvision import transforms
 from parse_config import ConfigParser
+from prepare_data import is_image_file, SkinDisease
 from resnet_train import skin_mean, skin_std
 
 
@@ -154,43 +156,75 @@ def main(config):
         })
     logger.info(log)
 
-
-def predict_single(image_path):
+def prepare_model():
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    checkpoint_path = 'saved/models/Skin_ResNet50_RIDE/0614_113738/model_best.pth'   # 'saved/models/model_best.pth'
+    checkpoint_path = 'saved/models/model_best.pth'
 
-    net = torch.load(checkpoint_path)
-    net.to(device)
+    # build model architecture
+    model = config.init_obj('arch', module_arch)
+    checkpoint = torch.load(config.resume)
+    state_dict = checkpoint['state_dict']
+    if config['n_gpu'] > 1:
+        model = torch.nn.DataParallel(model)
+    model.load_state_dict(state_dict)
+
+    # prepare model for testing
+    model = model.to(device)
+    model.eval()
 
     # 数据增强l
     image_transforms = transforms.Compose([transforms.Resize([224, 224]), transforms.ToTensor(),
                                            transforms.Normalize(skin_mean, skin_std)])
+    return image_transforms, model, device
+
+
+def predict_single(image_path, image_transforms, model, device, i):
+
     img = Image.open(image_path).convert('RGB')
     if transforms is not None:
         img = image_transforms(img)
     # expand batch dimension
     img = torch.unsqueeze(img, dim=0)
-    # prediction
-    net.eval()
+
     with torch.no_grad():
         # predict class
-        output = torch.squeeze(net(img.to(device))).cpu()
-        predict = torch.softmax(output, dim=0)
+        output, sample_num_experts = model(img.to(device))
+        predict = torch.softmax(output, dim=1).cpu()
         predict_cla = torch.argmax(predict).numpy()
-        print(predict_cla)
+        label = []
+        if image_path.split('us_label_mask1/')[1] == txt_list[i].split(',')[0]:
+            label = [txt_list[i].split(',')[1], txt_list[i].split(',')[2]]
+            i += 1
+        else:
+            print("error in i:{} image path:{} and txt list:{}".format(i, image_path, txt_list[i]))
+    return i, [image_path, label, [int(predict_cla), SkinDisease(int(predict_cla)).name], predict[0][predict_cla].numpy()]
 
 
 if __name__ == '__main__':
-    # args = argparse.ArgumentParser(description='PyTorch Template')
-    # args.add_argument('-c', '--config', default=None, type=str,
-    #                   help='config file path (default: None)')
-    # args.add_argument('-r', '--resume', default=None, type=str,
-    #                   help='path to latest checkpoint (default: None)')
-    # args.add_argument('-d', '--device', default=None, type=str,
-    #                   help='indices of GPUs to enable (default: all)')
-    #
-    # config = ConfigParser.from_args(args)
+    args = argparse.ArgumentParser(description='PyTorch Template')
+    args.add_argument('-c', '--config', default=None, type=str,
+                      help='config file path (default: None)')
+    args.add_argument('-r', '--resume', default=None, type=str,
+                      help='path to latest checkpoint (default: None)')
+    args.add_argument('-d', '--device', default=None, type=str,
+                      help='indices of GPUs to enable (default: all)')
+
+    config = ConfigParser.from_args(args)
     # main(config)
-    image_path = 'data/us_label_mask1/d45685 左鼻 BCC.jpg'
-    predict_single(image_path)
+    image_transforms, model, device = prepare_model()
+    img_dir = 'data/us_label_mask1/'
+    images = [os.path.join(img_dir, x) for x in os.listdir(img_dir) if is_image_file(x)]
+    dataset = tablib.Dataset()
+    dataset.headers = ["image", "label_class", "predict_class", "prob"]
+    with open('data/us_label_mask1/1342data.txt') as file:
+        content = file.read()
+        txt_list = content.split('\n')
+    i = 0
+    # image_path = 'data/us_label_mask1/d45685 左鼻 BCC.jpg'
+    for image_path in images:
+        i, result = predict_single(image_path, image_transforms, model, device, i)
+        dataset.append(result)
+
+    with open('RIDE-predict.xlsx', mode='wb') as f:
+        f.write(dataset.xlsx)
