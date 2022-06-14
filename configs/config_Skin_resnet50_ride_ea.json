@@ -7,7 +7,7 @@
         "args": {
             "num_classes": 22,
             "reduce_dimension": true,
-            "num_experts": 6,
+            "num_experts": 9,
             "top_choices_num": 22,
             "use_norm": true,
             "pos_weight": 1e2
@@ -17,7 +17,7 @@
         "type": "iNaturalistDataLoader",
         "args":{
             "data_dir": "data/us_label_mask1/",
-            "batch_size": 8,
+            "batch_size": 16,
             "shuffle": true,
             "num_workers": 8,
             "balanced": false
