@@ -121,16 +121,6 @@ class iNaturalistDataLoader(DataLoader):
 
         self.dataset = train_dataset
         self.val_dataset = val_dataset
-        # print('train_dataset.indices', self.dataset.indices)
-        # print('val_dataset.indices', self.val_dataset.indices)
-        train_label_list = []
-        val_label_list = []
-        for i in self.dataset.indices:
-            train_label_list.append(self.dataset.dataset.labels[i])
-        for j in self.val_dataset.indices:
-            val_label_list.append(self.val_dataset.dataset.labels[j])
-        print('train_label_list: ', train_label_list)
-        print('val_label_list: ', val_label_list)
 
         self.n_samples = len(self.dataset)
         target_list = []
