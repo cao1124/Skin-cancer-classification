@@ -158,7 +158,7 @@ def main(config):
 def predict_single(image_path):
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    checkpoint_path = 'saved/models/model_best.pth'
+    checkpoint_path = 'saved/models/Skin_ResNet50_RIDE/0614_113738/model_best.pth'   # 'saved/models/model_best.pth'
 
     net = torch.load(checkpoint_path)
     net.to(device)
