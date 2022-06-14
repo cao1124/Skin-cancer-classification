@@ -1,12 +1,17 @@
 import argparse
+import os
+
 import torch
+from PIL import Image
 from tqdm import tqdm
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
 import numpy as np
+from torchvision import transforms
 from parse_config import ConfigParser
+from resnet_train import skin_mean, skin_std
 
 
 def main(config):
@@ -150,14 +155,42 @@ def main(config):
     logger.info(log)
 
 
-if __name__ == '__main__':
-    args = argparse.ArgumentParser(description='PyTorch Template')
-    args.add_argument('-c', '--config', default=None, type=str,
-                      help='config file path (default: None)')
-    args.add_argument('-r', '--resume', default=None, type=str,
-                      help='path to latest checkpoint (default: None)')
-    args.add_argument('-d', '--device', default=None, type=str,
-                      help='indices of GPUs to enable (default: all)')
+def predict_single(image_path):
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    checkpoint_path = 'saved/models/model_best.pth'
 
-    config = ConfigParser.from_args(args)
-    main(config)
+    net = torch.load(checkpoint_path)
+    net.to(device)
+
+    # 数据增强l
+    image_transforms = transforms.Compose([transforms.Resize([224, 224]), transforms.ToTensor(),
+                                           transforms.Normalize(skin_mean, skin_std)])
+    img = Image.open(image_path).convert('RGB')
+    if transforms is not None:
+        img = image_transforms(img)
+    # expand batch dimension
+    img = torch.unsqueeze(img, dim=0)
+    # prediction
+    net.eval()
+    with torch.no_grad():
+        # predict class
+        output = torch.squeeze(net(img.to(device))).cpu()
+        predict = torch.softmax(output, dim=0)
+        predict_cla = torch.argmax(predict).numpy()
+        print(predict_cla)
+
+
+if __name__ == '__main__':
+    # args = argparse.ArgumentParser(description='PyTorch Template')
+    # args.add_argument('-c', '--config', default=None, type=str,
+    #                   help='config file path (default: None)')
+    # args.add_argument('-r', '--resume', default=None, type=str,
+    #                   help='path to latest checkpoint (default: None)')
+    # args.add_argument('-d', '--device', default=None, type=str,
+    #                   help='indices of GPUs to enable (default: all)')
+    #
+    # config = ConfigParser.from_args(args)
+    # main(config)
+    image_path = 'data/us_label_mask1/d45685 左鼻 BCC.jpg'
+    predict_single(image_path)
