@@ -162,8 +162,8 @@ def predict_single_image(txt_list, i, image_path, checkpoint_path):
         output = torch.squeeze(net(img.to(device))).cpu()
         predict = torch.softmax(output, dim=0)
         predict_cla = torch.argmax(predict).numpy()
-        # print('image:{}, predict_cla:{}, prob:{}'.format(image_path, SkinDisease(int(predict_cla)),
-        #                                                  predict[predict_cla].numpy()))
+        print('image:{}, predict_cla:{}, prob:{}'.format(image_path, SkinDisease(int(predict_cla)),
+                                                         predict[predict_cla].numpy()))
         label = []
         if image_path.split('us_label_mask1/')[1] == txt_list[i].split(',')[0]:
             label = [txt_list[i].split(',')[1], txt_list[i].split(',')[2]]
@@ -239,5 +239,5 @@ if __name__ == '__main__':
         i, result = predict_single_image(txt_list, i, image_path, checkpoint_path)
         dataset.append(result)
 
-    with open('predict.xlsx', mode='wb') as f:
+    with open('resnet-predict.xlsx', mode='wb') as f:
         f.write(dataset.xlsx)

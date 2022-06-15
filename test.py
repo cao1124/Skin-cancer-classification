@@ -156,6 +156,7 @@ def main(config):
         })
     logger.info(log)
 
+
 def prepare_model():
     os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
