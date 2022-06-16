@@ -1,5 +1,7 @@
 import collections
 import os
+
+import numpy as np
 import torch
 from torch.optim import lr_scheduler
 from torchvision import models, transforms
@@ -117,14 +119,15 @@ def train_and_valid(data_dir, epochs=25):
 
     # DataLoader
     dataset = SkinDataset(data_dir, data_dir + '1342data.txt', image_transforms['train'])
-    class_sample_counts = [i[1] for i in sorted(collections.Counter(dataset.labels).items(), key=lambda x: x[0], reverse=False)]
-    weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
-    samples_weights = weights[dataset.labels]
-    sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
 
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
                                                                 int(len(dataset) * 0.2)], generator=torch.manual_seed(0))  # i
+    class_sample_counts = [i[1] for i in
+                           sorted(collections.Counter(train_dataset.labels).items(), key=lambda x: x[0], reverse=False)]
+    weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
+    samples_weights = weights[train_dataset.labels]
+    sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
     bs = 8
     # sklearn flod 五折交叉验证
     skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
@@ -139,8 +142,8 @@ def train_and_valid(data_dir, epochs=25):
 
         logger.info('batch size = {}:'.format(bs))
         model, optimizer, scheduler, loss_function = prepare_model(epochs)
-        train_data = DataLoader(train_dataset, batch_size=bs, shuffle=False, sampler=sampler, num_workers=8)
-        valid_data = DataLoader(val_dataset, batch_size=bs, shuffle=False, num_workers=8)
+        train_data = DataLoader(train_dataset, batch_size=bs, sampler=sampler)
+        valid_data = DataLoader(val_dataset, batch_size=bs)
         logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
         history = []
         best_val_acc = 0.0
@@ -163,9 +166,9 @@ def train_and_valid(data_dir, epochs=25):
                 labels = data[1].to(device)
 
                 # inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)        # mixup
-                outputs = model(inputs)
                 # outputs = outputs.logits                                                   # inception-v3 TypeError
                 # loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)    # mixup
+                outputs = model(inputs)
                 loss = loss_function(outputs, labels)
                 train_loss += loss.item()
                 pred = torch.max(outputs, 1)[1]
@@ -220,7 +223,7 @@ def train_and_valid(data_dir, epochs=25):
 
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = "0,1"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
