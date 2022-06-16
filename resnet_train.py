@@ -1,13 +1,11 @@
+import collections
 import os
-
-import numpy as np
-import pandas as pd
 import torch
 from torch.optim import lr_scheduler
 from torchvision import models, transforms
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import DataLoader, random_split, Dataset
+from torch.utils.data import DataLoader, random_split, Dataset, WeightedRandomSampler
 from tqdm import tqdm
 from PIL import Image
 from utils.get_log import _get_logger
@@ -119,10 +117,14 @@ def train_and_valid(data_dir, epochs=25):
 
     # DataLoader
     dataset = SkinDataset(data_dir, data_dir + '1342data.txt', image_transforms['train'])
+    class_sample_counts = [i[1] for i in sorted(collections.Counter(dataset.labels).items(), key=lambda x: x[0], reverse=False)]
+    weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
+    samples_weights = weights[dataset.labels]
+    sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
+
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
-    n_val = int(len(dataset) * 0.2)
-    n_train = len(dataset) - n_val
-    train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.manual_seed(0))  # i
+    train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
+                                                                int(len(dataset) * 0.2)], generator=torch.manual_seed(0))  # i
     bs = 8
     # sklearn flod 五折交叉验证
     skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
@@ -137,7 +139,7 @@ def train_and_valid(data_dir, epochs=25):
 
         logger.info('batch size = {}:'.format(bs))
         model, optimizer, scheduler, loss_function = prepare_model(epochs)
-        train_data = DataLoader(train_dataset, batch_size=bs, shuffle=True, num_workers=8)
+        train_data = DataLoader(train_dataset, batch_size=bs, shuffle=False, sampler=sampler, num_workers=8)
         valid_data = DataLoader(val_dataset, batch_size=bs, shuffle=False, num_workers=8)
         logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
         history = []
@@ -218,10 +220,10 @@ def train_and_valid(data_dir, epochs=25):
 
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0,1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_epochs = 200
+    num_epochs = 100
     data_dir = 'data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
