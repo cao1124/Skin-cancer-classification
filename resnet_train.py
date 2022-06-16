@@ -224,7 +224,7 @@ def train_and_valid(data_dir, epochs=25):
 
 
 if __name__ == '__main__':
-    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
