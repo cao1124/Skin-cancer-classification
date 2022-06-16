@@ -10,6 +10,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, random_split, Dataset, WeightedRandomSampler
 from tqdm import tqdm
 from PIL import Image
+
+from torchsampler import ImbalancedDatasetSampler
 from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
@@ -132,19 +134,19 @@ def train_and_valid(data_dir, epochs=25):
         train_dataset.indices = list(train_index)
         val_dataset.indices = list(val_index)
 
-        train_labels = [train_dataset.dataset.labels[i] for i in train_dataset.indices]
-        # WeightedRandomSampler
-        class_sample_counts = [i[1] for i in sorted(collections.Counter(train_labels).items(), key=lambda x: x[0], reverse=False)]
-        weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
-        samples_weights = weights[train_labels]
-        sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
+        # train_labels = [train_dataset.dataset.labels[i] for i in train_dataset.indices]
+        # # WeightedRandomSampler
+        # class_sample_counts = [i[1] for i in sorted(collections.Counter(train_labels).items(), key=lambda x: x[0], reverse=False)]
+        # weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
+        # samples_weights = weights[train_labels]
+        # sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
 
         train_data_size = len(train_dataset.indices)
         valid_data_size = len(val_dataset.indices)
 
         logger.info('batch size = {}:'.format(bs))
         model, optimizer, scheduler, loss_function = prepare_model(epochs)
-        train_data = DataLoader(train_dataset, batch_size=bs, sampler=sampler)
+        train_data = DataLoader(train_dataset, batch_size=bs, sampler=ImbalancedDatasetSampler(train_dataset),)
         valid_data = DataLoader(val_dataset, batch_size=bs)
         logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
         history = []
