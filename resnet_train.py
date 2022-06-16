@@ -132,10 +132,11 @@ def train_and_valid(data_dir, epochs=25):
         train_dataset.indices = list(train_index)
         val_dataset.indices = list(val_index)
 
+        train_labels = [train_dataset.dataset.labels[i] for i in train_dataset.indices]
         # WeightedRandomSampler
-        class_sample_counts = [i[1] for i in sorted(collections.Counter(train_dataset.labels).items(), key=lambda x: x[0], reverse=False)]
+        class_sample_counts = [i[1] for i in sorted(collections.Counter(train_labels).items(), key=lambda x: x[0], reverse=False)]
         weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
-        samples_weights = weights[train_dataset.labels]
+        samples_weights = weights[train_labels]
         sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
 
         train_data_size = len(train_dataset.indices)
