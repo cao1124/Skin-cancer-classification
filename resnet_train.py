@@ -146,7 +146,7 @@ def train_and_valid(data_dir, epochs=25):
 
         logger.info('batch size = {}:'.format(bs))
         model, optimizer, scheduler, loss_function = prepare_model(epochs)
-        train_data = DataLoader(train_dataset, batch_size=bs, sampler=ImbalancedDatasetSampler(train_dataset),)
+        train_data = DataLoader(train_dataset, batch_size=bs, sampler=ImbalancedDatasetSampler(train_dataset))
         valid_data = DataLoader(val_dataset, batch_size=bs)
         logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
         history = []
