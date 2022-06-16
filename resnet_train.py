@@ -123,11 +123,6 @@ def train_and_valid(data_dir, epochs=25):
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
                                                                 int(len(dataset) * 0.2)], generator=torch.manual_seed(0))  # i
-    class_sample_counts = [i[1] for i in
-                           sorted(collections.Counter(train_dataset.labels).items(), key=lambda x: x[0], reverse=False)]
-    weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
-    samples_weights = weights[train_dataset.labels]
-    sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
     bs = 8
     # sklearn flod 五折交叉验证
     skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
@@ -136,6 +131,12 @@ def train_and_valid(data_dir, epochs=25):
         logger.info('第{}次实验:'.format(i))
         train_dataset.indices = list(train_index)
         val_dataset.indices = list(val_index)
+
+        # WeightedRandomSampler
+        class_sample_counts = [i[1] for i in sorted(collections.Counter(train_dataset.labels).items(), key=lambda x: x[0], reverse=False)]
+        weights = 1. / torch.tensor(class_sample_counts, dtype=torch.float)
+        samples_weights = weights[train_dataset.labels]
+        sampler = WeightedRandomSampler(weights=samples_weights, num_samples=len(samples_weights), replacement=True)
 
         train_data_size = len(train_dataset.indices)
         valid_data_size = len(val_dataset.indices)
