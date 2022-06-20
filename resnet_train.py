@@ -10,7 +10,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, random_split, Dataset, WeightedRandomSampler
 from tqdm import tqdm
 from PIL import Image
-
+from model.fully_conv_resnet import FullyConvolutionalResnet
 from torchsampler import ImbalancedDatasetSampler
 from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
@@ -49,8 +49,9 @@ class SkinDataset(Dataset):
 
 def prepare_model(epochs):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet50(pretrained=True)
-    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    model = FullyConvolutionalResnet(num_classes=22, pretrained=True)
+    # model = models.resnet50(pretrained=True)
+    # model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
