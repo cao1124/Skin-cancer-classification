@@ -1,11 +1,11 @@
 {
-    "name": "Skin_ResNet50_RIDE",
+    "name": "Skin_ResNet50_RIDE-two-class",
     "n_gpu": 2,
 
     "arch": {
         "type": "ResNet50Model",
         "args": {
-            "num_classes": 22,
+            "num_classes": 2,
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
@@ -15,10 +15,10 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "/home/ai1000/project/data/expand_images/",
+            "data_dir": "/home/ai1000/project/data/square/",
             "batch_size": 6,
             "shuffle": true,
-            "num_workers": 8
+            "num_workers": 12
         }
     },
 
