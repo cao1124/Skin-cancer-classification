@@ -4,10 +4,10 @@ from torch.hub import load_state_dict_from_url
 from torchvision import models
 
 
-class FullyConvolutionalResnet(models.ResNet):
+class FullyConvolutionalResnet18(models.ResNet):
     def __init__(self, num_classes=1000, pretrained=False, **kwargs):
-        # Start with standard resnet50 defined here  [3, 4, 6, 3]    resnet18  [2, 2, 2, 2]
-        super().__init__(block=models.resnet.BasicBlock, layers=[3, 4, 6, 3], num_classes=num_classes, **kwargs)
+        # Start with standard resnet18 defined here
+        super().__init__(block=models.resnet.BasicBlock, layers=[2, 2, 2, 2], num_classes=num_classes, **kwargs)
         if pretrained:
             state_dict = load_state_dict_from_url(models.resnet.model_urls["resnet18"], progress=True)
         self.load_state_dict(state_dict)
