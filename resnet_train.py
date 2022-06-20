@@ -16,7 +16,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-square.txt', 'info')
+logger = _get_logger('/home/ai1000/project/data/saved/log/two-class.txt', 'info')
 skin_mean, skin_std = [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # 1342张  expand images
 # [0.016, 0.016, 0.017], [0.094, 0.094, 0.097]  # 1342张 1315 expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # 1342张 us_label_mask1
