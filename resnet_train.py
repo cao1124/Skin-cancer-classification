@@ -17,7 +17,8 @@ from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
 logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-five.txt', 'info')
-skin_mean, skin_std = [0.016, 0.016, 0.017], [0.094, 0.094, 0.097]  # 1342张 expand images
+skin_mean, skin_std = [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # 1342张  expand images
+# [0.016, 0.016, 0.017], [0.094, 0.094, 0.097]  # 1342张 1315 expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # 1342张 us_label_mask1
 # skin_mean, skin_std = [0.526, 0.439, 0.393], [0.189, 0.183, 0.177]  # 839张 photo_img_merge
 
@@ -104,7 +105,7 @@ def train_and_valid(data_dir, epochs=25):
     # 数据增强
     image_transforms = {
         'train': transforms.Compose([
-            # transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
+            transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
             # Cutout(),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomVerticalFlip(p=0.5),
@@ -114,7 +115,7 @@ def train_and_valid(data_dir, epochs=25):
             transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
             transforms.Normalize(skin_mean, skin_std)]),
         'valid': transforms.Compose([
-            # transforms.Resize([224, 224]),
+            transforms.Resize([224, 224]),
             transforms.ToTensor(),
             transforms.Normalize(skin_mean, skin_std)
         ])
@@ -126,7 +127,7 @@ def train_and_valid(data_dir, epochs=25):
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
                                                                 int(len(dataset) * 0.2)], generator=torch.manual_seed(0))  # i
-    bs = 6
+    bs = 8
     # sklearn flod 五折交叉验证
     skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
     i = 0
@@ -232,7 +233,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    data_dir = '/home/ai1000/project/data/expand_images/'
+    data_dir = '/home/ai1000/project/data/square/'
     train_and_valid(data_dir, num_epochs)
 
     # plt show
