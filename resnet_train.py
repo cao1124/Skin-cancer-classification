@@ -16,7 +16,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-five.txt', 'info')
+logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-square.txt', 'info')
 skin_mean, skin_std = [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # 1342张  expand images
 # [0.016, 0.016, 0.017], [0.094, 0.094, 0.097]  # 1342张 1315 expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # 1342张 us_label_mask1
@@ -122,7 +122,7 @@ def train_and_valid(data_dir, epochs=25):
     }
 
     # DataLoader
-    dataset = SkinDataset(data_dir, data_dir + '1342data.txt', image_transforms['train'])
+    dataset = SkinDataset(data_dir, data_dir + '1351data.txt', image_transforms['train'])
 
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
