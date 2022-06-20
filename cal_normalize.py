@@ -36,9 +36,9 @@ def compute_mean_and_std(dataset):
 
       N += np.prod(img[:, :, 0].shape)
 
-    std_b = np.sqrt(diff_b / N)
-    std_g = np.sqrt(diff_g / N)
-    std_r = np.sqrt(diff_r / N)
+    std_b = np.sqrt(diff_b / np.abs(N))
+    std_g = np.sqrt(diff_g / np.abs(N))
+    std_r = np.sqrt(diff_r / np.abs(N))
 
     mean = (round(mean_b.item() / 255.0, 3), round(mean_g.item() / 255.0, 3), round(mean_r.item() / 255.0, 3))
     std = (round(std_b.item() / 255.0, 3), round(std_g.item() / 255.0, 3), round(std_r.item() / 255.0, 3))
@@ -46,7 +46,7 @@ def compute_mean_and_std(dataset):
 
 
 if __name__ == '__main__':
-    path = "D:/PycharmProjects/skin-disease-classification-by-ride/data/us"
+    path = "D:/PycharmProjects/data/skin_data/us_label_mask1/expand_images"
     train_data = torchvision.datasets.ImageFolder(path)
     train_mean, train_std = compute_mean_and_std(train_data.imgs)
     print(train_mean, train_std)
