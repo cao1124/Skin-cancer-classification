@@ -39,3 +39,9 @@ class FullyConvolutionalResnet18(models.ResNet):
         # Instead, we forward pass through the last conv layer
         x = self.last_conv(x)
         return x
+
+
+if __name__ == '__main__':
+    model = FullyConvolutionalResnet18(pretrained=True)
+    model.fc = nn.Linear(in_features=512, out_features=22, bias=True)
+    model.last_conv = torch.nn.Conv2d(512, 22, kernel_size=(1, 1), stride=(1, 1))
