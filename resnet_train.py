@@ -126,7 +126,7 @@ def train_and_valid(data_dir, epochs=25):
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
                                                                 int(len(dataset) * 0.2)], generator=torch.manual_seed(0))  # i
-    bs = 8
+    bs = 6
     # sklearn flod 五折交叉验证
     skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
     i = 0
