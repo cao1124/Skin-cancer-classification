@@ -233,7 +233,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    num_class = 2
+    num_class = 13
     data_dir = '/home/ai1000/project/data/square/'
     train_and_valid(data_dir, num_epochs)
 
