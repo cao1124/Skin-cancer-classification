@@ -16,7 +16,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('saved/log/resnet18-five.txt', 'info')
+logger = _get_logger('data/saved/log/resnet18-five.txt', 'info')     # 'saved/log/resnet18-five.txt'
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # 1342张 us_label_mask1
 # skin_mean, skin_std = [0.526, 0.439, 0.393], [0.189, 0.183, 0.177]  # 839张 photo_img_merge
 
@@ -234,7 +234,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    data_dir = 'D:/PycharmProjects/data/skin_data/us_label_mask1/'
+    data_dir = 'data/us_label_mask1/'   # 'D:/PycharmProjects/data/skin_data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
     # plt show
