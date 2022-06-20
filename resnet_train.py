@@ -103,7 +103,7 @@ def train_and_valid(data_dir, epochs=25):
     # 数据增强
     image_transforms = {
         'train': transforms.Compose([
-            transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
+            # transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
             # Cutout(),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomVerticalFlip(p=0.5),
@@ -113,7 +113,7 @@ def train_and_valid(data_dir, epochs=25):
             transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
             transforms.Normalize(skin_mean, skin_std)]),
         'valid': transforms.Compose([
-            transforms.Resize([224, 224]),
+            # transforms.Resize([224, 224]),
             transforms.ToTensor(),
             transforms.Normalize(skin_mean, skin_std)
         ])
