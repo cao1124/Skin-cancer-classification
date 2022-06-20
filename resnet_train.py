@@ -16,7 +16,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('data/saved/log/resnet18-five.txt', 'info')
+logger = _get_logger('saved/log/resnet18-five.txt', 'info')
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # 1342张 us_label_mask1
 # skin_mean, skin_std = [0.526, 0.439, 0.393], [0.189, 0.183, 0.177]  # 839张 photo_img_merge
 
@@ -49,7 +49,9 @@ class SkinDataset(Dataset):
 
 def prepare_model(epochs):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = FullyConvolutionalResnet18(num_classes=22, pretrained=True)
+    model = FullyConvolutionalResnet18(pretrained=True)
+    model.fc = nn.Linear(in_features=512, out_features=22, bias=True)
+    model.last_conv = torch.nn.Conv2d(512, 22, kernel_size=(1, 1), stride=(1, 1))
     # model = models.resnet50(pretrained=True)
     # model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
@@ -232,7 +234,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
-    data_dir = 'data/us_label_mask1/'
+    data_dir = 'D:/PycharmProjects/data/skin_data/us_label_mask1/'
     train_and_valid(data_dir, num_epochs)
 
     # plt show
