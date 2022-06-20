@@ -52,7 +52,7 @@ class SkinDataset(Dataset):
 def prepare_model(epochs):
     # 迁移学习  这里使用ResNet-50的预训练模型。
     model = models.resnet50(pretrained=True)
-    model.fc = nn.Linear(in_features=2048, out_features=22, bias=True)
+    model.fc = nn.Linear(in_features=2048, out_features=num_class, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
@@ -122,7 +122,7 @@ def train_and_valid(data_dir, epochs=25):
     }
 
     # DataLoader
-    dataset = SkinDataset(data_dir, data_dir + '1351data.txt', image_transforms['train'])
+    dataset = SkinDataset(data_dir, data_dir + 'two-class.txt', image_transforms['train'])
 
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
@@ -233,6 +233,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     num_epochs = 100
+    num_class = 2
     data_dir = '/home/ai1000/project/data/square/'
     train_and_valid(data_dir, num_epochs)
 
