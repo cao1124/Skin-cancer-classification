@@ -142,7 +142,7 @@ class iNaturalistDataLoader(DataLoader):
 
         if balanced:
             if training:
-                buckets = [[] for _ in range(num_classes)]
+                buckets = [[] for _ in range(num_classes + 13)]
                 for idx, label in enumerate(dataset.targets):
                     buckets[label].append(idx)
                 sampler = BalancedSampler(buckets, retain_epoch_size)
