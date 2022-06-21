@@ -1,9 +1,9 @@
 {
-    "name": "Skin_ResNeXt50_RIDE-two-class",
+    "name": "Skin_ResNet50_RIDE-two-class",
     "n_gpu": 2,
 
     "arch": {
-        "type": "ResNeXt50Model",
+        "type": "ResNet50Model",
         "args": {
             "num_classes": 2,
             "reduce_dimension": true,
