@@ -1,5 +1,5 @@
 {
-    "name": "Skin_ResNeXt50_RIDE-benign",
+    "name": "Skin_ResNeXt50_RIDE-malignant",
     "n_gpu": 2,
 
     "arch": {
