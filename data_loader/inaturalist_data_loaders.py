@@ -134,7 +134,7 @@ class iNaturalistDataLoader(DataLoader):
         # assert num_classes == 8142
         assert num_classes == 9
 
-        cls_num_list = [0] * num_classes
+        cls_num_list = [0] * (num_classes + 13)
         for label in target_list:
             cls_num_list[label] += 1
 
