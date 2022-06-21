@@ -7,7 +7,6 @@ from torchvision import transforms
 from torch.utils.data import DataLoader, Dataset, Sampler, random_split
 from PIL import Image
 from resnet_train import skin_mean, skin_std
-from utils import AddGaussianNoise
 
 
 class BalancedSampler(Sampler):
@@ -101,7 +100,7 @@ class iNaturalistDataLoader(DataLoader):
         if training:
             # dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_train.txt', train_trsfm)
             # val_dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_val.txt', test_trsfm)
-            dataset = LT_Dataset(data_dir, data_dir + '/two-class.txt', train_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/benign.txt', train_trsfm)
             n_val = int(len(dataset) * 0.2)
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))
@@ -113,7 +112,7 @@ class iNaturalistDataLoader(DataLoader):
                 break
 
         else:   # test
-            dataset = LT_Dataset(data_dir, data_dir + '/two-class.txt', test_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/benign.txt', test_trsfm)
             n_val = int(len(dataset) * 0.2)
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val], generator=torch.Generator().manual_seed(0))
@@ -133,7 +132,7 @@ class iNaturalistDataLoader(DataLoader):
             target_list.append(dataset.targets[i])
         num_classes = len(np.unique(target_list))
         # assert num_classes == 8142
-        assert num_classes == 2
+        assert num_classes == 13
 
         cls_num_list = [0] * num_classes
         for label in target_list:

@@ -1,11 +1,11 @@
 {
-    "name": "Skin_ResNet50_RIDE-two-class",
+    "name": "Skin_ResNeXt50_RIDE-benign",
     "n_gpu": 2,
 
     "arch": {
         "type": "ResNeXt50Model",
         "args": {
-            "num_classes": 2,
+            "num_classes": 13,
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
