@@ -3,7 +3,7 @@
     "n_gpu": 2,
 
     "arch": {
-        "type": "ResNet50Model",
+        "type": "ResNeXt50Model",
         "args": {
             "num_classes": 2,
             "reduce_dimension": true,
@@ -15,8 +15,8 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "/home/ai1000/project/data/square/",
-            "batch_size": 32,
+            "data_dir": "/home/ai1000/project/data/us_label_mask1/",
+            "batch_size": 16,
             "shuffle": true,
             "num_workers": 12
         }
