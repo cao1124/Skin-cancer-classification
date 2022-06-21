@@ -15,7 +15,7 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "D:\\PycharmProjects\\data\\skin_data\\us_label_mask1/",
+            "data_dir": "/home/ai1000/project/data/us_label_mask1/",
             "batch_size": 16,
             "shuffle": true,
             "num_workers": 12
