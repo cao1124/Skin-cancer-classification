@@ -16,10 +16,10 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/malignant.txt', 'info')
-skin_mean, skin_std = [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # 1342张  expand images
-# [0.016, 0.016, 0.017], [0.094, 0.094, 0.097]  # 1342张 1315 expand images
-# [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # 1342张 us_label_mask1
+logger = _get_logger('/home/ai1000/project/data/saved/log/two_benign_malignant.txt', 'info')
+skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
+# [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
+# [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
 # skin_mean, skin_std = [0.526, 0.439, 0.393], [0.189, 0.183, 0.177]  # 839张 photo_img_merge
 
 
@@ -49,7 +49,7 @@ class SkinDataset(Dataset):
         return len(self.labels)
 
 
-def prepare_model(epochs):
+def prepare_model(epochs, num_class):
     # 迁移学习  这里使用ResNet-50的预训练模型。
     model = models.resnet50(pretrained=True)
     model.fc = nn.Linear(in_features=2048, out_features=num_class, bias=True)
@@ -101,7 +101,7 @@ def prepare_model(epochs):
     return model, optimizer, scheduler, loss_func
 
 
-def train_and_valid(data_dir, epochs=25):
+def train_and_valid(data_path, epochs, txt_path, num_class):
     # 数据增强
     image_transforms = {
         'train': transforms.Compose([
@@ -122,7 +122,7 @@ def train_and_valid(data_dir, epochs=25):
     }
 
     # DataLoader
-    dataset = SkinDataset(data_dir, data_dir + 'malignant.txt', image_transforms['train'])
+    dataset = SkinDataset(data_path, data_path + txt_path, image_transforms['train'])
 
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
@@ -147,7 +147,7 @@ def train_and_valid(data_dir, epochs=25):
         valid_data_size = len(val_dataset.indices)
 
         logger.info('batch size = {}:'.format(bs))
-        model, optimizer, scheduler, loss_function = prepare_model(epochs)
+        model, optimizer, scheduler, loss_function = prepare_model(epochs, num_class)
         train_data = DataLoader(train_dataset, batch_size=bs, sampler=ImbalancedDatasetSampler(train_dataset))
         valid_data = DataLoader(val_dataset, batch_size=bs)
         logger.info('train_data_size:{}, valid_data_size:{}'.format(train_data_size, valid_data_size))
@@ -231,11 +231,14 @@ def train_and_valid(data_dir, epochs=25):
 if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
     num_epochs = 100
-    num_class = 22
-    data_dir = '/home/ai1000/project/data/square/'
-    train_and_valid(data_dir, num_epochs)
+
+    data_dir = '/home/ai1000/project/data/us_label_mask1/'
+
+    txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
+    class_list = [22, 13, 9]
+    for i in range(0, 3):
+        train_and_valid(data_dir, num_epochs, txt_name[i], class_list[i])
 
     # plt show
     # trained_model, history =train_and_valid(dataset, model, optimizer, scheduler, loss_func, num_epochs)
