@@ -185,7 +185,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
                 optimizer.step()
                 scheduler.step()  # 需要在优化器参数更新之后再动态调整学习率
 
-            confusion_matrix = torch.zeros(22, 22).cuda()
+            confusion_matrix = torch.zeros(num_class, num_class).cuda()
             with torch.no_grad():
                 model.eval()
 
