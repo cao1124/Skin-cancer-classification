@@ -134,15 +134,15 @@ class iNaturalistDataLoader(DataLoader):
         # assert num_classes == 8142
         assert num_classes == 9
 
-        cls_num_list = [0] * (num_classes + 13)
+        cls_num_list = [0] * num_classes
         for label in target_list:
-            cls_num_list[label] += 1
+            cls_num_list[label - 13] += 1
 
         self.cls_num_list = cls_num_list
 
         if balanced:
             if training:
-                buckets = [[] for _ in range(num_classes + 13)]
+                buckets = [[] for _ in range(num_classes)]
                 for idx, label in enumerate(dataset.targets):
                     buckets[label].append(idx)
                 sampler = BalancedSampler(buckets, retain_epoch_size)
