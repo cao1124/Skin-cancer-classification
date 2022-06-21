@@ -235,10 +235,12 @@ if __name__ == '__main__':
 
     data_dir = '/home/ai1000/project/data/us_label_mask1/'
 
-    txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
-    class_list = [22, 13, 9]
-    for i in range(0, 3):
-        train_and_valid(data_dir, num_epochs, txt_name[i], class_list[i])
+    train_and_valid(data_dir, num_epochs, '1351-27classes.txt', 27)
+
+    # txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
+    # class_list = [22, 13, 9]
+    # for i in range(0, 3):
+    #     train_and_valid(data_dir, num_epochs, txt_name[i], class_list[i])
 
     # plt show
     # trained_model, history =train_and_valid(dataset, model, optimizer, scheduler, loss_func, num_epochs)
