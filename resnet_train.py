@@ -16,7 +16,8 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/two_benign_malignant.txt', 'info')
+os.environ['CUDA_VISIBLE_DEVICES'] = '1'
+logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-test-only-resize.txt', 'info')
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 # [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
@@ -107,12 +108,12 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
         'train': transforms.Compose([
             transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
             # Cutout(),
-            transforms.RandomHorizontalFlip(p=0.5),
-            transforms.RandomVerticalFlip(p=0.5),
-            transforms.RandomRotation(90),
-            transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
+            # transforms.RandomHorizontalFlip(p=0.5),
+            # transforms.RandomVerticalFlip(p=0.5),
+            # transforms.RandomRotation(90),
+            # transforms.ColorJitter(brightness=0.5, contrast=0.5, saturation=0.5, hue=0.5),
             transforms.ToTensor(),
-            transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
+            # transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
             transforms.Normalize(skin_mean, skin_std)]),
         'valid': transforms.Compose([
             transforms.Resize([224, 224]),
@@ -127,7 +128,6 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
                                                                 int(len(dataset) * 0.2)], generator=torch.manual_seed(0))  # i
-    bs = 8
     # sklearn flod 五折交叉验证
     skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
     i = 0
@@ -232,10 +232,10 @@ if __name__ == '__main__':
     os.environ['CUDA_VISIBLE_DEVICES'] = "0, 1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_epochs = 100
-
+    bs = 8
     data_dir = '/home/ai1000/project/data/us_label_mask1/'
 
-    train_and_valid(data_dir, num_epochs, '1351-27classes.txt', 27)
+    train_and_valid(data_dir, num_epochs, '1351data.txt', 22)
 
     # txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
     # class_list = [22, 13, 9]
