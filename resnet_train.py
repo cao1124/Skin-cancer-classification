@@ -16,7 +16,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-27class.txt', 'info')
+logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-4class.txt', 'info')
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 # [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
@@ -234,7 +234,7 @@ if __name__ == '__main__':
     bs = 8
     data_dir = '/home/ai1000/project/data/us_label_mask1/'
 
-    train_and_valid(data_dir, num_epochs, '1351-27classes.txt', 27)
+    train_and_valid(data_dir, num_epochs, '4class.txt', 4)
 
     # txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
     # class_list = [22, 13, 9]
