@@ -48,7 +48,7 @@ class SkinDataset(Dataset):
 
 def prepare_model(epochs, num_class):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet50(pretrained=True)
+    model = models.resnext50_32x4d(pretrained=True)
     model.fc = nn.Linear(in_features=2048, out_features=num_class, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
@@ -231,12 +231,12 @@ if __name__ == '__main__':
     bs = 8
     data_dir = '/home/ai1000/project/data/square/'
 
-    train_and_valid(data_dir, num_epochs, '1351data.txt', 22)
+    # train_and_valid(data_dir, num_epochs, '1351data.txt', 2)
 
-    # txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
-    # class_list = [22, 13, 9]
-    # for i in range(0, 3):
-    #     train_and_valid(data_dir, num_epochs, txt_name[i], class_list[i])
+    txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
+    class_list = [22, 13, 9]
+    for i in range(0, 3):
+        train_and_valid(data_dir, num_epochs, txt_name[i], class_list[i])
 
     # plt show
     # trained_model, history =train_and_valid(dataset, model, optimizer, scheduler, loss_func, num_epochs)
