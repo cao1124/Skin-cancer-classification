@@ -1,7 +1,4 @@
-import collections
 import os
-
-import numpy as np
 import torch
 from torch.optim import lr_scheduler
 from torchvision import models, transforms
@@ -10,13 +7,12 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, random_split, Dataset, WeightedRandomSampler
 from tqdm import tqdm
 from PIL import Image
-
 from torchsampler import ImbalancedDatasetSampler
 from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-2class.txt', 'info')
+logger = _get_logger('/home/ai1000/project/data/saved/log/square-resnet50-2class.txt', 'info')
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 # [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
@@ -232,7 +228,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_epochs = 100
     bs = 8
-    data_dir = '/home/ai1000/project/data/us_label_mask1/'
+    data_dir = '/home/ai1000/project/data/square/'
 
     train_and_valid(data_dir, num_epochs, 'two-class.txt', 2)
 
