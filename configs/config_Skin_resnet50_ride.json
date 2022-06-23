@@ -15,7 +15,7 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "/home/ai1000/project/data/skin_data/square/",
+            "data_dir": "/home/ai1000/project/data/square",
             "batch_size": 16,
             "shuffle": true,
             "num_workers": 12
