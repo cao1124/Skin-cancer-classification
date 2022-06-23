@@ -1,3 +1,4 @@
+# coding: utf-8
 import argparse
 import collections
 import torch
@@ -67,14 +68,16 @@ def main(config):
             lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
     else:
         lr_scheduler = None
+    for i in range(len(data_loader.dataset.indices)):
+        logger.info('第{}次实验：'.format(i))
+        data_loader.dataset.indices = data_loader.dataset.indices[i]
+        trainer = Trainer(model, criterion, metrics, optimizer,
+                          config=config,
+                          data_loader=data_loader,
+                          valid_data_loader=valid_data_loader,
+                          lr_scheduler=lr_scheduler)
 
-    trainer = Trainer(model, criterion, metrics, optimizer,
-                      config=config,
-                      data_loader=data_loader,
-                      valid_data_loader=valid_data_loader,
-                      lr_scheduler=lr_scheduler)
-
-    trainer.train()
+        trainer.train()
 
 
 if __name__ == '__main__':

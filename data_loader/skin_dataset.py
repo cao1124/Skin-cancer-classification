@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 
 class SkinDataset(Dataset):
     def __init__(self, data_dir, transform=None, target_transform=None):
-        fh = open(data_dir + 'data.txt', 'r')
+        fh = open(data_dir + 'data.txt', 'rb')
         imgs = []
         for line in fh:
             line = line.rstrip()

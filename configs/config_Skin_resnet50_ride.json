@@ -15,7 +15,7 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "/home/ai1000/project/data/us_label_mask1/",
+            "data_dir": "D:/PycharmProjects/data/skin_data/us_label_mask1/",
             "batch_size": 16,
             "shuffle": true,
             "num_workers": 12
@@ -37,7 +37,7 @@
         "args": {
             "reweight": true,
             "reweight_factor": 0.015,
-            "reweight_epoch": 80
+            "reweight_epoch": 240
         }
     },
     "metrics": [
@@ -46,12 +46,12 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 50,
+            "T_max": 150,
             "eta_min": 0.0
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 300,
 
         "save_dir": "saved/",
         "save_period": 100,
