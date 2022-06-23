@@ -28,7 +28,7 @@ class SkinDataset(Dataset):
         self.img_path = []
         self.labels = []
         self.transforms = transforms
-        with open(txt, 'r', encoding='gb2312') as f:
+        with open(txt, 'r', encoding='utf-8') as f:
             for line in f:
                 self.img_path.append(os.path.join(root, line.split(',')[0]))
                 self.labels.append(int(line.split(',')[1]))
