@@ -1,5 +1,5 @@
 {
-    "name": "Skin_ResNeXt50_RIDE-malignant",
+    "name": "Skin_ResNeXt50_RIDE-two",
     "n_gpu": 2,
 
     "arch": {
