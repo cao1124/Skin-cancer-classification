@@ -14,7 +14,7 @@ from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
 logger = _get_logger('/home/ai1000/project/data/saved/log/square-resnet50-2class.txt', 'info')
-skin_mean, skin_std = [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]
+skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 # [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
 # skin_mean, skin_std = [0.526, 0.439, 0.393], [0.189, 0.183, 0.177]  # 839张 photo_img_merge
@@ -231,7 +231,7 @@ if __name__ == '__main__':
     bs = 8
     data_dir = '/home/ai1000/project/data/square/'
 
-    train_and_valid(data_dir, num_epochs, 'two-class.txt', 2)
+    train_and_valid(data_dir, num_epochs, '1351data.txt', 22)
 
     # txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
     # class_list = [22, 13, 9]
