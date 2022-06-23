@@ -16,7 +16,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/resnet18-2class.txt', 'info')
+logger = _get_logger('/home/ai1000/project/data/saved/log/resnet50-2class.txt', 'info')
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 # [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
@@ -28,7 +28,7 @@ class SkinDataset(Dataset):
         self.img_path = []
         self.labels = []
         self.transforms = transforms
-        with open(txt, 'r', encoding='utf-8') as f:
+        with open(txt, 'r', encoding='gb2312') as f:
             for line in f:
                 self.img_path.append(os.path.join(root, line.split(',')[0]))
                 self.labels.append(int(line.split(',')[1]))
@@ -51,8 +51,8 @@ class SkinDataset(Dataset):
 
 def prepare_model(epochs, num_class):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet18(pretrained=True)
-    model.fc = nn.Linear(in_features=512, out_features=num_class, bias=True)
+    model = models.resnet50(pretrained=True)
+    model.fc = nn.Linear(in_features=2048, out_features=num_class, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
     #                                       ('relu1', nn.ReLU()),
