@@ -13,7 +13,7 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/square-resnet50-2class.txt', 'info')
+logger = _get_logger('/home/ai1000/project/data/saved/log/test-resnet50-2class.txt', 'info')
 skin_mean, skin_std = [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]
 # [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
@@ -48,7 +48,7 @@ class SkinDataset(Dataset):
 
 def prepare_model(epochs, num_class):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.resnet50(pretrained=True)
+    model = models.resnext50(pretrained=True)
     model.fc = nn.Linear(in_features=2048, out_features=num_class, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
@@ -229,7 +229,7 @@ if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_epochs = 100
     bs = 8
-    data_dir = '/home/ai1000/project/data/square/'
+    data_dir = '/home/ai1000/project/data/us_label_mask1/'
 
     train_and_valid(data_dir, num_epochs, '1351data.txt', 22)
 
