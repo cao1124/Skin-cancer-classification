@@ -101,7 +101,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
     # 数据增强
     image_transforms = {
         'train': transforms.Compose([
-            transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
+            transforms.Resize([299, 299]),   # inception v3 resize change 224 to 299
             # Cutout(),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomVerticalFlip(p=0.5),
@@ -111,7 +111,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
             transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
             transforms.Normalize(skin_mean, skin_std)]),
         'valid': transforms.Compose([
-            transforms.Resize([224, 224]),
+            transforms.Resize([299, 299]),
             transforms.ToTensor(),
             transforms.Normalize(skin_mean, skin_std)
         ])
@@ -167,9 +167,9 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
                 labels = data[1].to(device)
 
                 # inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)        # mixup
-                # outputs = outputs.logits                                                   # inception-v3 TypeError
                 # loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)    # mixup
                 outputs = model(inputs)
+                outputs = outputs.logits                                                   # inception-v3 TypeError
                 loss = loss_function(outputs, labels)
                 train_loss += loss.item()
                 pred = torch.max(outputs, 1)[1]
