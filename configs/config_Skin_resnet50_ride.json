@@ -1,11 +1,11 @@
 {
-    "name": "Skin_ResNeXt50_RIDE-two",
+    "name": "Skin_ResNeXt50_RIDE-malignant",
     "n_gpu": 1,
 
     "arch": {
         "type": "ResNeXt50Model",
         "args": {
-            "num_classes": 2,
+            "num_classes": 9,
             "reduce_dimension": true,
             "use_norm": true,
             "returns_feat": true,
