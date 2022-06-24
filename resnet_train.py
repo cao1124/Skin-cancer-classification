@@ -128,6 +128,8 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
     i = 0
     for train_index, val_index in skf.split(dataset.img_path, dataset.labels):
         logger.info('第{}次实验:'.format(i))
+        save_path = '/home/ai1000/project/data/saved/checkpoint/' + txt_path.split('.')[0] + str(i)
+        os.makedirs(save_path)
         train_dataset.indices = list(train_index)
         val_dataset.indices = list(val_index)
 
@@ -212,7 +214,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
             if best_val_acc < avg_valid_acc:
                 best_val_acc = avg_valid_acc
                 best_epoch = epoch + 1
-                torch.save(model, '/home/ai1000/project/data/saved/checkpoint/train_best_model-' + str(i) + '.pt')
+                torch.save(model, save_path + 'train_best_model-' + str(i) + '.pt')
                 logger.info("Best acc per class:：{}".format(acc_per_class))
 
             logger.info("Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%".format(
