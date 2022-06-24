@@ -1,5 +1,3 @@
-import logging
-
 import numpy as np
 import torch
 from torchvision.utils import make_grid
@@ -137,7 +135,7 @@ class Trainer(BaseTrainer):
 
                     if isinstance(output, dict):
                         output = output["output"]
-                    logging.info('output.shape{}, target.shape{}'.format(output.size(), target.size()))
+
                     if self.distill:
                         loss = self.criterion(student=output, target=target, teacher=teacher, extra_info=extra_info)
                     elif self.add_extra_info:

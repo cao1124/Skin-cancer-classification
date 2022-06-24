@@ -1,6 +1,8 @@
 # coding: utf-8
 import argparse
 import collections
+import os
+
 import torch
 import numpy as np
 import data_loader.data_loaders as module_data
@@ -68,14 +70,20 @@ def main(config):
             lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
     else:
         lr_scheduler = None
+    for i in range(len(data_loader.dataset.indices)):
+        logger.info('第{}次实验：'.format(i))
+        data_loader.dataset.indices = data_loader.dataset.indices[i]
+        data_loader.cls_num_list = data_loader.cls_num_list[i]
+        data_loader.n_samples = len(data_loader.dataset.indices)
+        data_loader.val_dataset.indices = data_loader.dataset.indices[i]
+        criterion = config.init_obj('loss', module_loss, cls_num_list=data_loader.cls_num_list)
+        trainer = Trainer(model, criterion, metrics, optimizer,
+                          config=config,
+                          data_loader=data_loader,
+                          valid_data_loader=valid_data_loader,
+                          lr_scheduler=lr_scheduler)
 
-    trainer = Trainer(model, criterion, metrics, optimizer,
-                      config=config,
-                      data_loader=data_loader,
-                      valid_data_loader=valid_data_loader,
-                      lr_scheduler=lr_scheduler)
-
-    trainer.train()
+        trainer.train()
 
 
 if __name__ == '__main__':
@@ -110,4 +118,5 @@ if __name__ == '__main__':
         CustomArgs(['--distill_checkpoint'], type=str, target='distill_checkpoint')
     ]
     config = ConfigParser.from_args(args, options)
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     main(config)
