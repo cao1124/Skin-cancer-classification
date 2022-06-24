@@ -1,6 +1,6 @@
 {
     "name": "Skin_ResNeXt50_RIDE-two",
-    "n_gpu": 2,
+    "n_gpu": 1,
 
     "arch": {
         "type": "ResNeXt50Model",

@@ -1,6 +1,8 @@
 # coding: utf-8
 import argparse
 import collections
+import os
+
 import torch
 import numpy as np
 import data_loader.data_loaders as module_data
@@ -112,4 +114,5 @@ if __name__ == '__main__':
         CustomArgs(['--distill_checkpoint'], type=str, target='distill_checkpoint')
     ]
     config = ConfigParser.from_args(args, options)
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
     main(config)
