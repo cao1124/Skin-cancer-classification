@@ -75,7 +75,6 @@ def main(config):
         data_loader.dataset.indices = data_loader.dataset.indices[i]
         data_loader.cls_num_list = data_loader.cls_num_list[i]
         data_loader.val_dataset.indices = data_loader.dataset.indices[i]
-        valid_data_loader.dataset.indices = valid_data_loader.dataset.indices[i]
         trainer = Trainer(model, criterion, metrics, optimizer,
                           config=config,
                           data_loader=data_loader,
