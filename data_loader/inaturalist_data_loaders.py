@@ -49,7 +49,7 @@ class LT_Dataset(Dataset):
         self.img_path = []
         self.labels = []
         self.transform = transform
-        with open(txt, 'r', encoding='utf-8') as f:
+        with open(txt, 'r', encoding='gb2312') as f:
             for line in f:
                 # self.img_path.append(os.path.join(root, line.split()[0]))
                 # self.labels.append(int(line.split()[1]))
@@ -104,20 +104,20 @@ class iNaturalistDataLoader(DataLoader):
         if training:
             # dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_train.txt', train_trsfm)
             # val_dataset = LT_Dataset(data_dir, data_dir + '/iNaturalist18_val.txt', test_trsfm)
-            dataset = LT_Dataset(data_dir, data_dir + '/two-class.txt', train_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/malignant.txt', train_trsfm)
             n_val = int(len(dataset) * 0.2)
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val],
                                                       generator=torch.Generator().manual_seed(0))
             # sklearn flod 五折交叉验证
-            train_dataset.indices, val_dataset.indices = [], []
             skf = StratifiedKFold(n_splits=5, random_state=None, shuffle=False)
             for train_index, val_index in skf.split(dataset.img_path, dataset.labels):
-                train_dataset.indices.append(list(train_index))
-                val_dataset.indices.append(list(val_index))
+                train_dataset.indices = list(train_index)
+                val_dataset.indices = list(val_index)
+                break
 
         else:  # test
-            dataset = LT_Dataset(data_dir, data_dir + '/two-class.txt', test_trsfm)
+            dataset = LT_Dataset(data_dir, data_dir + '/malignant.txt', test_trsfm)
             n_val = int(len(dataset) * 0.2)
             n_train = len(dataset) - n_val
             train_dataset, val_dataset = random_split(dataset, lengths=[n_train, n_val],
@@ -134,20 +134,15 @@ class iNaturalistDataLoader(DataLoader):
 
         self.n_samples = len(self.dataset)
         target_list = []
-        for n in range(5):
-            a = []
-            for i in list(train_dataset.indices[n]):
-                a.append(dataset.targets[i])
-            target_list.append(a)
-        num_classes = len(np.unique(target_list[0]))
+        for i in list(train_dataset.indices):
+            target_list.append(dataset.targets[i])
+        num_classes = len(np.unique(target_list))
         # assert num_classes == 8142
+        assert num_classes == 9
 
-        cls_num_list = []
-        for i in target_list:
-            cls_num = [0] * num_classes
-            for label in i:
-                cls_num[label] += 1
-            cls_num_list.append(cls_num)
+        cls_num_list = [0] * num_classes
+        for label in target_list:
+            cls_num_list[label] += 1
 
         self.cls_num_list = cls_num_list
 
@@ -177,3 +172,4 @@ class iNaturalistDataLoader(DataLoader):
         # return None
         # If you want to validate:
         return DataLoader(dataset=self.val_dataset, **self.init_kwargs)
+
