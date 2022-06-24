@@ -75,7 +75,7 @@ def main(config):
         data_loader.dataset.indices = data_loader.dataset.indices[i]
         data_loader.cls_num_list = data_loader.cls_num_list[i]
         data_loader.n_samples = len(data_loader.dataset.indices)
-        data_loader.val_dataset.indices = data_loader.dataset.indices[i]
+        data_loader.val_dataset.indices = data_loader.val_dataset.indices[i]
         criterion = config.init_obj('loss', module_loss, cls_num_list=data_loader.cls_num_list)
         trainer = Trainer(model, criterion, metrics, optimizer,
                           config=config,
