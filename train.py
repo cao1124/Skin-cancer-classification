@@ -73,6 +73,7 @@ def main(config):
     for i in range(len(data_loader.dataset.indices)):
         logger.info('第{}次实验：'.format(i))
         data_loader.dataset.indices = data_loader.dataset.indices[i]
+        valid_data_loader.dataset.indices = valid_data_loader.dataset.indices[i]
         trainer = Trainer(model, criterion, metrics, optimizer,
                           config=config,
                           data_loader=data_loader,

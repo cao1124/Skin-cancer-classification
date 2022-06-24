@@ -13,7 +13,6 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-logger = _get_logger('/home/ai1000/project/data/saved/log/test-square-resnet50-2class.txt', 'info')
 skin_mean, skin_std = [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]
 # [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
@@ -225,6 +224,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
 
 
 if __name__ == '__main__':
+    logger = _get_logger('/home/ai1000/project/data/saved/log/test-square-resnet50-2class.txt', 'info')
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_epochs = 100
