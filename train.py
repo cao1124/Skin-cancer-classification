@@ -72,10 +72,10 @@ def main(config):
         lr_scheduler = None
     for i in range(len(data_loader.dataset.indices)):
         logger.info('第{}次实验：'.format(i))
-        data_loader.dataset.indices = data_loader.dataset.indices[i]
-        data_loader.cls_num_list = data_loader.cls_num_list[i]
+        data_loader.dataset.indices = data_loader.dataset.indices[1]
+        data_loader.cls_num_list = data_loader.cls_num_list[1]
         data_loader.n_samples = len(data_loader.dataset.indices)
-        data_loader.val_dataset.indices = data_loader.dataset.indices[i]
+        data_loader.val_dataset.indices = data_loader.dataset.indices[1]
         trainer = Trainer(model, criterion, metrics, optimizer,
                           config=config,
                           data_loader=data_loader,
