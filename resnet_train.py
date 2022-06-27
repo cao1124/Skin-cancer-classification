@@ -1,5 +1,6 @@
 # coding: utf-8
 import os
+import tablib
 import torch
 from torch.optim import lr_scheduler
 from torchvision import models, transforms
@@ -132,6 +133,14 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
         os.makedirs(save_path)
         train_dataset.indices = list(train_index)
         val_dataset.indices = list(val_index)
+        print('.....')
+        dataset = tablib.Dataset()
+        dataset.headers = ['id', 'img_path', 'label']
+        for i in val_dataset.indices:
+            img_id = i
+            img_path = val_dataset.dataset.img_path
+            img_label = val_dataset.dataset.labels
+            dataset.append([img_id, img_path, img_label])
 
         # train_labels = [train_dataset.dataset.labels[i] for i in train_dataset.indices]
         # # WeightedRandomSampler
@@ -226,7 +235,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
 
 
 if __name__ == '__main__':
-    logger = _get_logger('/home/ai1000/project/data/saved/log/test-square-resnet50-2class.txt', 'info')
+    logger = _get_logger('/home/ai1000/project/data/saved/log/square-inception_v3-22class-2class-benign-malignant.txt', 'info')
     os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_epochs = 100
@@ -235,9 +244,11 @@ if __name__ == '__main__':
 
     # train_and_valid(data_dir, num_epochs, '1351data.txt', 2)
 
-    txt_name = ['two-class.txt', 'benign.txt', 'malignant.txt']
-    class_list = [22, 13, 9]
-    for i in range(0, 3):
+    txt_name = ['1351data.txt', 'two-class.txt', 'benign.txt', 'malignant.txt']
+    class_list = [22, 2, 13, 9]
+    for i in range(len(class_list)):
+        print(i)
+        logger.info(txt_name)
         train_and_valid(data_dir, num_epochs, txt_name[i], class_list[i])
 
     # plt show
