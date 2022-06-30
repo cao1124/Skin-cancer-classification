@@ -1,5 +1,7 @@
 # coding: utf-8
 import os
+from enum import Enum
+
 import tablib
 import torch
 from torch.optim import lr_scheduler
@@ -14,10 +16,12 @@ from utils.get_log import _get_logger
 from sklearn.model_selection import StratifiedKFold
 import warnings
 warnings.filterwarnings("ignore")
-skin_mean, skin_std = [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]
+skin_mean, skin_std = [0.277, 0.277, 0.282], [0.247, 0.247, 0.252]
 # [0.125, 0.125, 0.128], [0.202, 0.202, 0.207]  # square expand images
 # [0.321, 0.321, 0.327], [0.222, 0.222, 0.226]  # us_label_mask1
 # skin_mean, skin_std = [0.526, 0.439, 0.393], [0.189, 0.183, 0.177]  # 839张 photo_img_merge
+# skin_mean, skin_std = [0.526, 0.439, 0.393], [0.190, 0.183, 0.178]  # 839张 photo_img_crop
+# [0.277, 0.277, 0.282], [0.247, 0.247, 0.252]     # 1351张 us_skin_crop
 
 
 class SkinDataset(Dataset):
@@ -48,7 +52,7 @@ class SkinDataset(Dataset):
 
 def prepare_model(epochs, num_class):
     # 迁移学习  这里使用ResNet-50的预训练模型。
-    model = models.inception_v3(pretrained=True)
+    model = models.resnext50_32x4d(pretrained=True)
     model.fc = nn.Linear(in_features=2048, out_features=num_class, bias=True)
     # model.classifier[2] = nn.Linear(in_features=1536, out_features=22, bias=True)  # convnext_large
     # model.fc = nn.Sequential(OrderedDict([('fc1', nn.Linear(2048, 128)),
@@ -102,7 +106,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
     # 数据增强
     image_transforms = {
         'train': transforms.Compose([
-            transforms.Resize([299, 299]),   # inception v3 resize change 224 to 299
+            transforms.Resize([224, 224]),   # inception v3 resize change 224 to 299
             # Cutout(),
             transforms.RandomHorizontalFlip(p=0.5),
             transforms.RandomVerticalFlip(p=0.5),
@@ -112,14 +116,14 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
             transforms.RandomErasing(p=0.5, scale=(0.02, 0.33), ratio=(0.3, 0.3), value=0, inplace=False),
             transforms.Normalize(skin_mean, skin_std)]),
         'valid': transforms.Compose([
-            transforms.Resize([299, 299]),
+            transforms.Resize([224, 224]),
             transforms.ToTensor(),
             transforms.Normalize(skin_mean, skin_std)
         ])
     }
 
     # DataLoader
-    dataset = SkinDataset(data_path, data_path + txt_path, image_transforms['train'])
+    dataset = SkinDataset(data_path + 'us_skin_crop/', data_path + txt_path, image_transforms['train'])
 
     # random split dataset 五折交叉验证 # seed_list = [5, 4, 3, 2, 1] for i in seed_list：
     train_dataset, val_dataset = random_split(dataset, lengths=[len(dataset) - int(len(dataset) * 0.2),
@@ -129,19 +133,11 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
     i = 0
     for train_index, val_index in skf.split(dataset.img_path, dataset.labels):
         logger.info('第{}次实验:'.format(i))
-        save_path = '/home/ai1000/project/data/saved/checkpoint/' + txt_path.split('.')[0] + str(i)
-        os.makedirs(save_path)
+        save_path = data_dir + 'saved/checkpoint/' + txt_path.split('.')[0] + '_' + str(i)
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
         train_dataset.indices = list(train_index)
         val_dataset.indices = list(val_index)
-        print('.....')
-        dataset = tablib.Dataset()
-        dataset.headers = ['id', 'img_path', 'label']
-        for i in val_dataset.indices:
-            img_id = i
-            img_path = val_dataset.dataset.img_path
-            img_label = val_dataset.dataset.labels
-            dataset.append([img_id, img_path, img_label])
-
         # train_labels = [train_dataset.dataset.labels[i] for i in train_dataset.indices]
         # # WeightedRandomSampler
         # class_sample_counts = [i[1] for i in sorted(collections.Counter(train_labels).items(), key=lambda x: x[0], reverse=False)]
@@ -180,7 +176,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
                 # inputs, labels_a, labels_b, lam = mixup_data(inputs, labels, alpha)        # mixup
                 # loss = mixup_criterion(loss_function, outputs, labels_a, labels_b, lam)    # mixup
                 outputs = model(inputs)
-                outputs = outputs.logits                                                   # inception-v3 TypeError
+                # outputs = outputs.logits                                                   # inception-v3 TypeError
                 loss = loss_function(outputs, labels)
                 train_loss += loss.item()
                 pred = torch.max(outputs, 1)[1]
@@ -223,7 +219,7 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
             if best_val_acc < avg_valid_acc:
                 best_val_acc = avg_valid_acc
                 best_epoch = epoch + 1
-                torch.save(model, save_path + 'train_best_model-' + str(i) + '.pt')
+                torch.save(model, save_path + '/train_best_model-' + str(i) + '.pt')
                 logger.info("Best acc per class:：{}".format(acc_per_class))
 
             logger.info("Epoch: {:03d}, Training: Loss: {:.4f}, Accuracy: {:.4f}%, \n\t\tValidation: Loss: {:.4f}, Accuracy: {:.4f}%".format(
@@ -235,20 +231,20 @@ def train_and_valid(data_path, epochs, txt_path, num_class):
 
 
 if __name__ == '__main__':
-    logger = _get_logger('/home/ai1000/project/data/saved/log/square-inception_v3-22class-2class-benign-malignant.txt', 'info')
-    os.environ['CUDA_VISIBLE_DEVICES'] = "1"
+    logger = _get_logger('/home/ai1000/project/data/saved/log/1351-skin-crop-22class-benign-malignant.txt', 'info')
+    os.environ['CUDA_VISIBLE_DEVICES'] = "0,1"
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     num_epochs = 100
     bs = 8
-    data_dir = '/home/ai1000/project/data/square/'
+    data_dir = '/home/ai1000/project/data/'
 
     # train_and_valid(data_dir, num_epochs, '1351data.txt', 2)
 
-    txt_name = ['1351data.txt', 'two-class.txt', 'benign.txt', 'malignant.txt']
+    txt_name = ['txt/1351data.txt', 'txt/two-class.txt', 'txt/benign.txt', 'txt/malignant.txt']
+    # txt_name = ['839photo_img.txt', '839two-class.txt', '839benign.txt', '839malignant.txt']
     class_list = [22, 2, 13, 9]
     for i in range(len(class_list)):
-        print(i)
-        logger.info(txt_name)
+        logger.info('测试{}分类结果：'.format(txt_name[i]))
         train_and_valid(data_dir, num_epochs, txt_name[i], class_list[i])
 
     # plt show

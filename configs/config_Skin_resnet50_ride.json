@@ -1,5 +1,5 @@
 {
-    "name": "Skin_ResNeXt50_RIDE-malignant",
+    "name": "RIDE-Skin_Crop_ResNeXt50_22classes",
     "n_gpu": 1,
 
     "arch": {
@@ -15,7 +15,7 @@
     "data_loader": {
         "type": "iNaturalistDataLoader",
         "args":{
-            "data_dir": "/home/ai1000/project/data/square",
+            "data_dir": "/home/ai1000/project/data/us_skin_crop",
             "batch_size": 16,
             "shuffle": true,
             "num_workers": 12
@@ -37,7 +37,7 @@
         "args": {
             "reweight": true,
             "reweight_factor": 0.015,
-            "reweight_epoch": 240
+            "reweight_epoch": 80
         }
     },
     "metrics": [
@@ -46,12 +46,12 @@
     "lr_scheduler": {
         "type": "CosineAnnealingLR",
         "args": {
-            "T_max": 150,
+            "T_max": 50,
             "eta_min": 0.0
         }
     },
     "trainer": {
-        "epochs": 300,
+        "epochs": 100,
 
         "save_dir": "saved/",
         "save_period": 100,

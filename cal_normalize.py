@@ -46,7 +46,7 @@ def compute_mean_and_std(dataset):
 
 
 if __name__ == '__main__':
-    path = "D:/PycharmProjects/data/skin_data/us_label_mask1/expand_images/square"
+    path = "D:/MAD_File/上海_皮肤病/us_skin_crop/"
     train_data = torchvision.datasets.ImageFolder(path)
     train_mean, train_std = compute_mean_and_std(train_data.imgs)
     print(train_mean, train_std)

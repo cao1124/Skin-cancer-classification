@@ -112,5 +112,5 @@ if __name__ == '__main__':
         CustomArgs(['--distill_checkpoint'], type=str, target='distill_checkpoint')
     ]
     config = ConfigParser.from_args(args, options)
-    os.environ['CUDA_VISIBLE_DEVICES'] = "0"
+    os.environ['CUDA_VISIBLE_DEVICES'] = "1"
     main(config)
